@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>StockAlgo</title>
+</head>
+<body>
+<!--<h1>-->
+<!--    Stocks Algos!-->
+<!--</h1>-->
+<!--<p>-->
+<!--    <a href="/stocks">Update stock list</a>-->
+<!--    <br>-->
+<!--    <a href="/run">Run stock algo</a>-->
+<!--    <br>-->
+<!--    <br>-->
+<!--</p>-->
+
+<div>
+    <h2> Run V20 Algorithm </h2>
+    <form method="post">
+        <label for="history">History (in days)</label>
+        <input type="text" name="history"
+               placeholder="10"
+               value="{{ history }}">
+        <br>
+        <label for="history">Margin (in percentage)</label>
+        <input type="text" name="margin"
+               placeholder="20"
+               value="{{ margin }}">
+        <br>
+        <label for="filter-by-last-close">Compare with latest price?</label>
+        <input type="checkbox" name="filter-by-last-close"
+               value="1" checked>
+        <label for="last-close-margin">Margin (in percentage)</label>
+        <input type="text" name="last-close-margin"
+               placeholder="5"
+               value="{{ last_close_margin }}">
+        <br>
+        <textarea name="stocks" cols="60" rows="20">{{ stocks }}</textarea>
+        <br>
+        <button type="submit">Run</button>
+    </form>
+</div>
+<div>
+    <br>
+    {% for r in result %}
+    {{ r }}<br>
+    {% endfor %}
+</div>
+</body>
+
+</body>
+</html>
