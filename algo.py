@@ -78,7 +78,15 @@ class Algo:
             else:
                 valid = True
         if valid:
-            self.ans.append(f"{self.stock}|{self.prices[start].fdate}|{round(margin, 2)}%|{round(self.prices[start-1].ma, 2)}|{low.fdate}|{round(low.low, 2)}|{high.fdate}|{round(high.high, 2)}")
+            self.ans.append({
+                'stock': self.stock,
+                'margin': round(margin, 2),
+                'ma': round(self.prices[start-1].ma, 2),
+                'low_date': low.fdate,
+                'low_price': round(low.low, 2),
+                'high_date': high.fdate,
+                'high_price': round(high.high, 2)
+            })
         return end + 1
 
     def run_algo(self):

@@ -19,54 +19,240 @@
     </div>
 </nav>
 
-<div class="container mt-5">
-    <div class="card-custom">
-        <h2>Run V20 Algorithm</h2>
-        <form method="post" class="mt-4">
-            <div class="form-row">
-                <div class="form-group col-md-6">
-                    <label for="history">History (in days)</label>
-                    <input type="text" class="form-control" id="history" name="history" placeholder="e.g., 10" value="{{ history }}">
-                </div>
-                <div class="form-group col-md-6">
-                    <label for="margin">Margin (in percentage)</label>
-                    <input type="text" class="form-control" id="margin" name="margin" placeholder="e.g., 20" value="{{ margin }}">
-                </div>
+<div class="container-fluid px-lg-5 mt-5">
+    <div class="row">
+        <!-- Algorithm Form Section -->
+        <div class="col-lg-4">
+            <div class="card-custom">
+                <h2>Run V20 Algorithm</h2>
+                <form method="post" class="mt-4">
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="history">History (in days)</label>
+                            <input type="text" class="form-control" id="history" name="history" placeholder="e.g., 10" value="{{ history }}">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="margin">Margin (in percentage)</label>
+                            <input type="text" class="form-control" id="margin" name="margin" placeholder="e.g., 20" value="{{ margin }}">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="filter-by-last-close" value="1" id="filter-by-last-close" checked>
+                            <label class="form-check-label" for="filter-by-last-close">
+                                Compare with latest price?
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="last-close-margin">Margin for latest price comparison (in percentage)</label>
+                        <input type="text" class="form-control" id="last-close-margin" name="last-close-margin" placeholder="e.g., 5" value="{{ last_close_margin }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="stocksTextArea">Stock Symbols</label>
+                        <textarea class="form-control" id="stocksTextArea" name="stocks" rows="10">{{ stocks }}</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Run Algorithm</button>
+                </form>
             </div>
-            <div class="form-group">
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="filter-by-last-close" value="1" id="filter-by-last-close" checked>
-                    <label class="form-check-label" for="filter-by-last-close">
-                        Compare with latest price?
-                    </label>
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="last-close-margin">Margin for latest price comparison (in percentage)</label>
-                <input type="text" class="form-control" id="last-close-margin" name="last-close-margin" placeholder="e.g., 5" value="{{ last_close_margin }}">
-            </div>
-            <div class="form-group">
-                <label for="stocksTextArea">Stock Symbols</label>
-                <textarea class="form-control" id="stocksTextArea" name="stocks" rows="10">{{ stocks }}</textarea>
-            </div>
-            <button type="submit" class="btn btn-primary">Run Algorithm</button>
-        </form>
-    </div>
+        </div>
 
-    {% if result %}
-    <div class="mt-5">
-        <h3>Algorithm Results</h3>
-        <div class="list-group">
-            {% for r in result %}
-            <div class="list-group-item">{{ r }}</div>
-            {% endfor %}
+        <!-- Results Section -->
+        <div class="col-lg-8">
+            {% if result %}
+                <div class="card-custom">
+                    <h3>Algorithm Results</h3>
+                    {% if result[0] == "No results!" %}
+                        <div class="text-center">
+                            <p class="lead mb-0">No matching results found with the current parameters.</p>
+                        </div>
+                    {% else %}
+                        <div class="row align-items-center mb-4">
+                            <div class="col-md-8">
+                                <input type="text" class="search-box" id="tableSearch" placeholder="Search stocks, dates, or prices...">
+                            </div>
+                            <div class="col-md-4">
+                                <div class="stats-dashboard justify-content-end">
+                                    <div class="stat-item">
+                                        <span class="stat-number" id="uniqueStocks">0</span>
+                                        <span class="stat-label">Unique Stocks</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="results-table">
+                            <table id="resultsTable">
+                                <thead>
+                                    <tr>
+                                        <th class="sortable" data-sort="stock">Stock</th>
+                                        <th class="sortable" data-sort="margin">Margin %</th>
+                                        <th class="sortable" data-sort="ma">200MA</th>
+                                        <th class="sortable" data-sort="low_date">Start Date</th>
+                                        <th class="sortable" data-sort="low_price">Low Price</th>
+                                        <th class="sortable" data-sort="high_date">High Date</th>
+                                        <th class="sortable" data-sort="high_price">High Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for r in result %}
+                                    <tr>
+                                        <td class="stock-cell">
+                                            <a href="https://www.tradingview.com/symbols/NSE-{{ r.stock }}/" target="_blank" class="stock-link">
+                                                {{ r.stock }}
+                                            </a>
+                                        </td>
+                                        <td class="margin-cell">{{ r.margin }}%</td>
+                                        <td class="ma-cell">₹{{ r.ma }}</td>
+                                        <td class="date-cell">{{ r.low_date }}</td>
+                                        <td class="price-cell">₹{{ r.low_price }}</td>
+                                        <td class="date-cell">{{ r.high_date }}</td>
+                                        <td class="price-cell">₹{{ r.high_price }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            <div class="no-results-message" id="noResultsMessage">
+                                <p>No results match your search criteria</p>
+                                <small>Try adjusting your search terms</small>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            {% else %}
+                <div class="card-custom text-center">
+                    <h3>Ready to Run Algorithm</h3>
+                    <p class="lead">Fill out the form on the left and click "Run Algorithm" to see results here.</p>
+                </div>
+            {% endif %}
         </div>
     </div>
-    {% endif %}
 </div>
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+// Table sorting and searching functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const table = document.getElementById('resultsTable');
+    const searchBox = document.getElementById('tableSearch');
+    const noResultsMessage = document.getElementById('noResultsMessage');
+    const uniqueStocks = document.getElementById('uniqueStocks');
+    let currentSort = { column: null, direction: 'asc' };
+
+    // Calculate unique stocks
+    function calculateUniqueStocks() {
+        const rows = table.querySelectorAll('tbody tr');
+        const visibleRows = Array.from(rows).filter(row => row.style.display !== 'none');
+
+        if (visibleRows.length === 0) {
+            uniqueStocks.textContent = '0';
+            return;
+        }
+
+        // Calculate unique stocks
+        const stocks = visibleRows.map(row => row.querySelector('.stock-cell').textContent);
+        const uniqueStocksSet = new Set(stocks);
+        uniqueStocks.textContent = uniqueStocksSet.size;
+    }
+
+    // Search functionality
+    searchBox.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const rows = table.querySelectorAll('tbody tr');
+        let visibleRows = 0;
+
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            if (text.includes(searchTerm)) {
+                row.style.display = '';
+                visibleRows++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        // Show/hide no results message
+        if (visibleRows === 0) {
+            noResultsMessage.classList.add('show');
+        } else {
+            noResultsMessage.classList.remove('show');
+        }
+
+        // Update stats
+        calculateUniqueStocks();
+    });
+
+    // Calculate initial stats
+    calculateUniqueStocks();
+
+    // Sorting functionality
+    table.querySelectorAll('th.sortable').forEach(header => {
+        header.addEventListener('click', function() {
+            const column = this.dataset.sort;
+            const direction = currentSort.column === column && currentSort.direction === 'asc' ? 'desc' : 'asc';
+
+            // Update sort indicators
+            table.querySelectorAll('th.sortable').forEach(th => {
+                th.classList.remove('asc', 'desc');
+            });
+            this.classList.add(direction);
+
+            currentSort = { column, direction };
+            sortTable(column, direction);
+        });
+    });
+
+    function sortTable(column, direction) {
+        const tbody = table.querySelector('tbody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+
+        rows.sort((a, b) => {
+            let aVal = a.querySelector(`td:nth-child(${getColumnIndex(column)})`).textContent;
+            let bVal = b.querySelector(`td:nth-child(${getColumnIndex(column)})`).textContent;
+
+            // Handle different data types
+            if (column === 'margin' || column === 'ma' || column === 'low_price' || column === 'high_price') {
+                aVal = parseFloat(aVal.replace(/[^\d.-]/g, ''));
+                bVal = parseFloat(bVal.replace(/[^\d.-]/g, ''));
+            } else if (column === 'low_date' || column === 'high_date') {
+                aVal = new Date(aVal.split('-').reverse().join('-'));
+                bVal = new Date(bVal.split('-').reverse().join('-'));
+            }
+
+            if (direction === 'asc') {
+                return aVal > bVal ? 1 : -1;
+            } else {
+                return aVal < bVal ? 1 : -1;
+            }
+        });
+
+        // Reorder rows
+        rows.forEach(row => tbody.appendChild(row));
+    }
+
+    function getColumnIndex(column) {
+        const columnMap = {
+            'stock': 1,
+            'margin': 2,
+            'ma': 3,
+            'low_date': 4,
+            'low_price': 5,
+            'high_date': 6,
+            'high_price': 7
+        };
+        return columnMap[column];
+    }
+});
+</script>
+
+<footer class="footer">
+    <div class="container-fluid px-lg-5">
+        <div class="footer-content">
+        </div>
+    </div>
+</footer>
+
 </body>
 </html>
