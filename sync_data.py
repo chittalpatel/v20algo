@@ -4,7 +4,7 @@ from tqdm import tqdm
 import time
 from datetime import date
 from api import equity_history
-from config import DATA_DIR, STOCKS_FILE, DEFAULT_INITIAL_YEARS
+from config import DATA_DIR, STOCKS_FILE, DEFAULT_INITIAL_YEARS, MASTER_STOCKS_FILE
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -15,16 +15,21 @@ def ensure_data_dir():
     DATA_DIR.mkdir(exist_ok=True)
 
 
-def get_stock_list():
+def _get_stock_list(file_path):
     """Read stock symbols from stocks.txt"""
-    if not STOCKS_FILE.exists():
-        raise FileNotFoundError(f"Stock list file '{STOCKS_FILE}' not found. Please create it.")
-    with open(STOCKS_FILE, 'r') as f:
+    if not file_path.exists():
+        raise FileNotFoundError(f"Stock list file '{file_path}' not found. Please create it.")
+    with open(file_path, 'r') as f:
         # Ensure symbols are uppercase and remove duplicates
         stocks = sorted(list(set([line.strip().upper() for line in f if line.strip()])))
     if not stocks:
-        raise ValueError(f"Stock list file '{STOCKS_FILE}' is empty.")
+        raise ValueError(f"Stock list file '{file_path}' is empty.")
     return stocks
+
+
+def get_stock_list():
+    """Read stock symbols from stocks.txt"""
+    return list(set(_get_stock_list(STOCKS_FILE) + _get_stock_list(MASTER_STOCKS_FILE)))
 
 
 def get_last_trading_day():

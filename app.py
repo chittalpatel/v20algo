@@ -10,23 +10,23 @@ with open(STOCKS_FILE) as f:
     stocks = sorted(f.read().splitlines())
 
 
-# @app.route('/')
-# def index():
-#     return render_template("index.html")
-
-
-# @app.route('/stocks', methods=['GET', 'POST'])
-# def stock():
-#     global stocks
-#     if request.method == 'POST':
-#         stocks = request.form["stocks"].splitlines()
-#         with open("./stocks", "w+") as fi:
-#             fi.write("\n".join(stocks))
-#     return render_template("stocks.html", stocks="\n".join(stocks))
-
-
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/')
 def index():
+    return render_template("index.html")
+
+
+@app.route('/stocks', methods=['GET', 'POST'])
+def stock():
+    global stocks
+    if request.method == 'POST':
+        stocks = request.form["stocks"].splitlines()
+        with open(STOCKS_FILE, "w+") as fi:
+            fi.write("\n".join(stocks))
+    return render_template("stocks.html", stocks="\n".join(stocks))
+
+
+@app.route('/run', methods=['GET', 'POST'])
+def run():
     result = []
     history = 10
     margin = 20
@@ -52,4 +52,4 @@ def index():
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0', port=8000)
