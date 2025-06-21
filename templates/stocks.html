@@ -2,31 +2,39 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>StockAlgo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Update Stocks - StockAlgo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-<h1>
-    Stocks Algos!
-</h1>
-<p>
-    <a href="/stocks">Update stock list</a>
-    <br>
-    <a href="/run">Run stock algo</a>
-    <br>
-    <br>
-</p>
+<nav class="navbar navbar-expand-lg">
+    <div class="navbar-nav mx-auto">
+        <a class="nav-link" href="/">Home</a>
+        <a class="nav-link active" href="/stocks">Update Stocks</a>
+        <a class="nav-link" href="/run">Run Algo</a>
+    </div>
+</nav>
 
-<div>
-    <h2> Stock Groups </h2>
-    <form method="get">
-
-    </form>
-    <form method="post">
-        <textarea name="stocks" cols="60" rows="20">{{ stocks }}</textarea>
-        <br>
-        <button type="submit">Submit</button>
-    </form>
+<div class="container mt-5">
+    <div class="card-custom">
+        <h2>Update Stock List</h2>
+        <p>Enter your stock symbols below, one per line.</p>
+        <form method="post" class="mt-4">
+            <div class="form-group">
+                <label for="stocksTextArea">Stock Symbols</label>
+                <textarea class="form-control" id="stocksTextArea" name="stocks" rows="15">{{ stocks }}</textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

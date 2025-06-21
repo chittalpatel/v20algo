@@ -1,0 +1,250 @@
+/* static/style.css */
+
+body {
+    font-family: 'Inter', sans-serif;
+    color: #111;
+    background-color: #f4f4f4;
+    background-image:
+        radial-gradient(circle at 25% 25%, rgba(255, 107, 107, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 75% 75%, rgba(107, 107, 255, 0.1) 0%, transparent 50%);
+}
+
+.navbar {
+    background: linear-gradient(135deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4) !important;
+    border-bottom: 4px solid #111;
+    padding: 1.5rem 2rem;
+    box-shadow: 0 8px 0px #111;
+    position: relative;
+}
+
+.navbar::before {
+    display: none;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: #111 !important;
+    text-transform: uppercase;
+    letter-spacing: -0.5px;
+    text-shadow: 2px 2px 0px rgba(255, 255, 255, 0.5);
+}
+
+.nav-link {
+    font-weight: 700;
+    color: #111 !important;
+    position: relative;
+    transition: all 0.3s ease;
+    padding: 12px 20px !important;
+    border-radius: 8px;
+    margin: 0 6px;
+    border: 3px solid #111;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 4px 4px 0px #111;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.nav-link:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0px #111;
+    background: #fff !important;
+}
+
+.nav-link.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: #fff !important;
+    box-shadow: 6px 6px 0px #111;
+    transform: translate(-2px, -2px);
+    border: 3px solid #111;
+}
+
+.nav-link::after {
+    display: none;
+}
+
+.card-custom {
+    background-color: #fff;
+    border: 3px solid #111;
+    border-radius: 15px;
+    padding: 2.5rem;
+    box-shadow: 12px 12px 0px #111;
+    animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    position: relative;
+    overflow: hidden;
+}
+
+.card-custom::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57);
+}
+
+@keyframes popIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) rotate(-1deg);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
+}
+
+.btn {
+    border: 3px solid #111;
+    border-radius: 12px;
+    font-weight: 700;
+    padding: 15px 30px;
+    box-shadow: 6px 6px 0px #111;
+    transition: all 0.2s ease-in-out;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.5s;
+}
+
+.btn:hover::before {
+    left: 100%;
+}
+
+.btn:hover {
+    box-shadow: 8px 8px 0px #111;
+    transform: translate(-2px, -2px);
+}
+
+.btn-primary, .btn-primary:active, .btn-primary:visited {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: #fff !important;
+    border-color: #111 !important;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%) !important;
+}
+
+.btn-secondary, .btn-secondary:active, .btn-secondary:visited {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important;
+    color: #fff !important;
+    border-color: #111 !important;
+}
+
+.btn-secondary:hover {
+    background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%) !important;
+}
+
+.form-control {
+    background-color: #fff;
+    border: 3px solid #111;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 6px 6px 0px #ddd;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.form-control:focus {
+    background-color: #fff;
+    color: #111;
+    box-shadow: 6px 6px 0px #111;
+    border-color: #111 !important;
+    transform: translate(-2px, -2px);
+}
+
+.form-control::placeholder {
+    color: #666;
+    font-style: italic;
+}
+
+label {
+    font-weight: 700;
+    margin-bottom: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #111;
+}
+
+.list-group-item {
+    background-color: #fff;
+    border: 3px solid #111;
+    margin-bottom: 15px;
+    border-radius: 12px;
+    box-shadow: 6px 6px 0px #ddd;
+    animation: resultSlideIn 0.5s ease-out forwards;
+    opacity: 0;
+    padding: 1.5rem;
+    font-weight: 500;
+    position: relative;
+    overflow: hidden;
+}
+
+.list-group-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+}
+
+@keyframes resultSlideIn {
+  from {
+    transform: translateX(-50px) rotate(-2deg);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+/* Additional decorative elements */
+.container h2, .container h3 {
+    position: relative;
+    display: inline-block;
+    background: linear-gradient(135deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+}
+
+.container h2::after, .container h3::after {
+    display: none;
+}
+
+/* Form check styling */
+.form-check-input {
+    width: 20px;
+    height: 20px;
+    border: 3px solid #111;
+    border-radius: 4px;
+    box-shadow: 3px 3px 0px #ddd;
+}
+
+.form-check-input:checked {
+    background-color: #111;
+    border-color: #111;
+    box-shadow: 3px 3px 0px #111;
+}
+
+.form-check-label {
+    font-weight: 600;
+    margin-left: 10px;
+}
