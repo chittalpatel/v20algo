@@ -87,11 +87,11 @@
                                     <tr>
                                         <th class="sortable" data-sort="stock">Stock</th>
                                         <th class="sortable" data-sort="margin">Margin %</th>
-                                        <th class="sortable" data-sort="ma">200MA</th>
+                                        <th class="sortable" data-sort="ma">200MA(₹)</th>
                                         <th class="sortable" data-sort="low_date">Start Date</th>
-                                        <th class="sortable" data-sort="low_price">Low Price</th>
+                                        <th class="sortable" data-sort="low_price">Low Price(₹)</th>
                                         <th class="sortable" data-sort="high_date">High Date</th>
-                                        <th class="sortable" data-sort="high_price">High Price</th>
+                                        <th class="sortable" data-sort="high_price">High Price(₹)</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -103,11 +103,11 @@
                                             </a>
                                         </td>
                                         <td data-label="Margin %" class="margin-cell">{{ r.margin }}%</td>
-                                        <td data-label="200MA" class="ma-cell">₹{{ r.ma }}</td>
+                                        <td data-label="200MA" class="ma-cell">{{ r.ma }}</td>
                                         <td data-label="Start Date" class="date-cell">{{ r.low_date }}</td>
-                                        <td data-label="Low Price" class="price-cell">₹{{ r.low_price }}</td>
+                                        <td data-label="Low Price" class="price-cell">{{ r.low_price }}</td>
                                         <td data-label="High Date" class="date-cell">{{ r.high_date }}</td>
-                                        <td data-label="High Price" class="price-cell">₹{{ r.high_price }}</td>
+                                        <td data-label="High Price" class="price-cell">{{ r.high_price }}</td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
