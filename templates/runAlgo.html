@@ -69,9 +69,10 @@
                     {% else %}
                         <div class="row align-items-center mb-4">
                             <div class="col-md-8">
-                                <input type="text" class="search-box" id="tableSearch" placeholder="Search stocks, dates, or prices...">
+                                <input type="text" class="search-box" id="tableSearch" placeholder="Search stock names...">
+                                <div id="autocomplete-list" class="autocomplete-items empty"></div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-4 d-none d-md-block">
                                 <div class="stats-dashboard justify-content-end">
                                     <div class="stat-item">
                                         <span class="stat-number" id="uniqueStocks">0</span>
@@ -96,17 +97,17 @@
                                 <tbody>
                                     {% for r in result %}
                                     <tr>
-                                        <td class="stock-cell">
+                                        <td data-label="Stock" class="stock-cell">
                                             <a href="https://www.tradingview.com/symbols/NSE-{{ r.stock }}/" target="_blank" class="stock-link">
                                                 {{ r.stock }}
                                             </a>
                                         </td>
-                                        <td class="margin-cell">{{ r.margin }}%</td>
-                                        <td class="ma-cell">₹{{ r.ma }}</td>
-                                        <td class="date-cell">{{ r.low_date }}</td>
-                                        <td class="price-cell">₹{{ r.low_price }}</td>
-                                        <td class="date-cell">{{ r.high_date }}</td>
-                                        <td class="price-cell">₹{{ r.high_price }}</td>
+                                        <td data-label="Margin %" class="margin-cell">{{ r.margin }}%</td>
+                                        <td data-label="200MA" class="ma-cell">₹{{ r.ma }}</td>
+                                        <td data-label="Start Date" class="date-cell">{{ r.low_date }}</td>
+                                        <td data-label="Low Price" class="price-cell">₹{{ r.low_price }}</td>
+                                        <td data-label="High Date" class="date-cell">{{ r.high_date }}</td>
+                                        <td data-label="High Price" class="price-cell">₹{{ r.high_price }}</td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
@@ -115,6 +116,41 @@
                                 <p>No results match your search criteria</p>
                                 <small>Try adjusting your search terms</small>
                             </div>
+                        </div>
+                        <!-- Mobile cards layout -->
+                        <div class="mobile-results-cards d-block d-md-none mt-3">
+                            {% for r in result %}
+                            <div class="result-card mb-4 p-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="font-weight-bold text-uppercase">Stock</span>
+                                    <a href="https://www.tradingview.com/symbols/NSE-{{ r.stock }}/" target="_blank" class="font-weight-bold text-uppercase stock-link">{{ r.stock }}</a>
+                                </div>
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span class="font-weight-bold text-success">Margin %</span>
+                                    <span class="font-weight-bold text-success">{{ r.margin }}%</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span class="font-weight-bold text-primary">200MA</span>
+                                    <span class="font-weight-bold text-primary">₹{{ r.ma }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span class="font-weight-bold text-secondary">Start Date</span>
+                                    <span class="font-weight-bold text-secondary">{{ r.low_date }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span class="font-weight-bold text-secondary">Low Price</span>
+                                    <span class="font-weight-bold text-secondary">₹{{ r.low_price }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span class="font-weight-bold text-secondary">High Date</span>
+                                    <span class="font-weight-bold text-secondary">{{ r.high_date }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="font-weight-bold text-secondary">High Price</span>
+                                    <span class="font-weight-bold text-secondary">₹{{ r.high_price }}</span>
+                                </div>
+                            </div>
+                            {% endfor %}
                         </div>
                     {% endif %}
                 </div>
@@ -164,8 +200,10 @@ document.addEventListener('DOMContentLoaded', function() {
         let visibleRows = 0;
 
         rows.forEach(row => {
-            const text = row.textContent.toLowerCase();
-            if (text.includes(searchTerm)) {
+            // Only match the stock name cell
+            const stockCell = row.querySelector('.stock-cell');
+            let stockName = stockCell ? stockCell.textContent.toLowerCase() : '';
+            if (stockName.includes(searchTerm)) {
                 row.style.display = '';
                 visibleRows++;
             } else {
@@ -182,6 +220,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Update stats
         calculateUniqueStocks();
+
+        // Also filter mobile cards by stock name only
+        if (window.innerWidth <= 768) {
+            filterMobileCards(searchTerm);
+        }
     });
 
     // Calculate initial stats
@@ -243,6 +286,85 @@ document.addEventListener('DOMContentLoaded', function() {
             'high_price': 7
         };
         return columnMap[column];
+    }
+});
+
+// Mobile card search functionality
+function filterMobileCards(searchTerm) {
+    const cards = document.querySelectorAll('.mobile-results-cards .result-card');
+    let visibleCount = 0;
+    cards.forEach(card => {
+        // Find the stock name span (second .font-weight-bold.text-uppercase)
+        const stockSpans = card.querySelectorAll('.font-weight-bold.text-uppercase');
+        let stockName = '';
+        if (stockSpans.length > 1) {
+            stockName = stockSpans[1].textContent.toLowerCase();
+        }
+        if (stockName.includes(searchTerm)) {
+            card.style.display = '';
+            visibleCount++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+    // Optionally, show/hide a 'no results' message for cards
+}
+
+// Attach search event for mobile cards
+const searchBox = document.getElementById('tableSearch');
+if (searchBox) {
+    searchBox.addEventListener('input', function() {
+        if (window.innerWidth <= 768) {
+            filterMobileCards(this.value.toLowerCase());
+        }
+    });
+}
+
+// Autocomplete for stock names
+function getAllStockNames() {
+    // For table: get all visible stock names
+    const tableStocks = Array.from(document.querySelectorAll('#resultsTable .stock-cell'));
+    const names = tableStocks.map(cell => cell.textContent.trim());
+    // For cards: get all visible card stock names
+    const cardStocks = Array.from(document.querySelectorAll('.mobile-results-cards .result-card'));
+    cardStocks.forEach(card => {
+        const stockSpans = card.querySelectorAll('.font-weight-bold.text-uppercase');
+        if (stockSpans.length > 1) {
+            names.push(stockSpans[1].textContent.trim());
+        }
+    });
+    // Remove duplicates
+    return Array.from(new Set(names));
+}
+
+const autocompleteList = document.getElementById('autocomplete-list');
+searchBox.addEventListener('input', function() {
+    // ... existing search code ...
+    // Autocomplete logic
+    const val = this.value.toLowerCase();
+    autocompleteList.innerHTML = '';
+    autocompleteList.classList.add('empty');
+    if (!val) return;
+    const stockNames = getAllStockNames();
+    const matches = stockNames.filter(name => name.toLowerCase().includes(val));
+    if (matches.length > 0) autocompleteList.classList.remove('empty');
+    matches.slice(0, 8).forEach(name => {
+        const item = document.createElement('div');
+        item.className = 'autocomplete-item';
+        item.innerHTML = name.replace(new RegExp(val, 'gi'), match => `<strong>${match}</strong>`);
+        item.addEventListener('mousedown', function(e) {
+            searchBox.value = name;
+            searchBox.dispatchEvent(new Event('input'));
+            autocompleteList.innerHTML = '';
+            autocompleteList.classList.add('empty');
+        });
+        autocompleteList.appendChild(item);
+    });
+});
+document.addEventListener('click', function(e) {
+    if (e.target !== searchBox) {
+        autocompleteList.innerHTML = '';
+        autocompleteList.classList.add('empty');
     }
 });
 </script>
