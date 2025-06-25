@@ -1,17 +1,12 @@
 [Unit]
-Description=V20Algo Flask Web Application
+Description=V20Algo Flask Web Application Service
 After=network.target
-Wants=network.target
 
 [Service]
 Type=simple
 User=ubuntu
-Group=ubuntu
 WorkingDirectory=/home/ubuntu/v20algo
-Environment=PATH=/home/ubuntu/v20algo/venv/bin:/usr/local/bin:/usr/bin:/bin
-Environment=PYTHONPATH=/home/ubuntu/v20algo
-Environment=FLASK_APP=app.py
-Environment=FLASK_ENV=production
+Environment=PATH=/home/ubuntu/v20algo/venv/bin
 ExecStart=/home/ubuntu/v20algo/venv/bin/python /home/ubuntu/v20algo/app.py
 Restart=always
 RestartSec=10
