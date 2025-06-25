@@ -7,7 +7,7 @@ Type=simple
 User=ubuntu
 WorkingDirectory=/home/ubuntu/v20algo
 Environment=PATH=/home/ubuntu/v20algo/venv/bin
-ExecStart=/home/ubuntu/v20algo/venv/bin/python /home/ubuntu/v20algo/app.py
+ExecStart=/home/ubuntu/v20algo/venv/bin/python3 /home/ubuntu/v20algo/app.py
 Restart=always
 RestartSec=10
 StandardOutput=journal
