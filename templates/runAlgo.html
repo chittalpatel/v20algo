@@ -262,9 +262,9 @@ document.addEventListener('DOMContentLoaded', function() {
             let bVal = b.querySelector(`td:nth-child(${getColumnIndex(column)})`).textContent;
 
             // Handle different data types
-            if (column === 'margin' || column === 'ma' || column === 'low_price' || column === 'high_price') {
-                aVal = parseFloat(aVal.replace(/[^\d.-]/g, ''));
-                bVal = parseFloat(bVal.replace(/[^\d.-]/g, ''));
+            if (column === 'profit_margin' || column === 'v20margin' || column === 'ma' || column === 'low_price' || column === 'high_price') {
+                aVal = parseFloat(aVal.replace(/[^\\d.-]/g, ''));
+                bVal = parseFloat(bVal.replace(/[^\\d.-]/g, ''));
             } else if (column === 'low_date' || column === 'high_date') {
                 aVal = new Date(aVal.split('-').reverse().join('-'));
                 bVal = new Date(bVal.split('-').reverse().join('-'));
@@ -284,12 +284,13 @@ document.addEventListener('DOMContentLoaded', function() {
     function getColumnIndex(column) {
         const columnMap = {
             'stock': 1,
-            'margin': 2,
-            'ma': 3,
-            'low_date': 4,
-            'low_price': 5,
-            'high_date': 6,
-            'high_price': 7
+            'profit_margin': 2,
+            'v20margin': 3,
+            'ma': 4,
+            'low_date': 5,
+            'low_price': 6,
+            'high_date': 7,
+            'high_price': 8
         };
         return columnMap[column];
     }
