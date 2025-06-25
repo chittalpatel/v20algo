@@ -1,0 +1,31 @@
+[Unit]
+Description=V20Algo Continuous Stock Data Sync
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/v20algo
+Environment=PATH=/home/ubuntu/v20algo/venv/bin:/usr/local/bin:/usr/bin:/bin
+Environment=PYTHONPATH=/home/ubuntu/v20algo
+ExecStart=/home/ubuntu/v20algo/venv/bin/python /home/ubuntu/v20algo/continuous_sync.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+# Logging
+SyslogIdentifier=v20algo-sync
+SyslogFacility=local0
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/home/ubuntu/v20algo/data
+
+[Install]
+WantedBy=multi-user.target

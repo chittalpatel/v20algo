@@ -1,0 +1,36 @@
+[Unit]
+Description=V20Algo Flask Web Application
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/v20algo
+Environment=PATH=/home/ubuntu/v20algo/venv/bin:/usr/local/bin:/usr/bin:/bin
+Environment=PYTHONPATH=/home/ubuntu/v20algo
+Environment=FLASK_APP=app.py
+Environment=FLASK_ENV=production
+ExecStart=/home/ubuntu/v20algo/venv/bin/python /home/ubuntu/v20algo/app.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+# Logging
+SyslogIdentifier=v20algo-flask
+SyslogFacility=local0
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/home/ubuntu/v20algo
+
+# Network
+BindIPv6Only=both
+
+[Install]
+WantedBy=multi-user.target

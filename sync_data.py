@@ -54,6 +54,7 @@ def get_last_trading_day():
 
 def download_stock_data(stock_symbol: str, start_date: date, end_date: date):
     print(f"Fetching data for {stock_symbol}...")
+    errors = []
     try:
         start_date_str = start_date.strftime('%d-%m-%Y')
         end_date_str = end_date.strftime('%d-%m-%Y')
@@ -65,8 +66,10 @@ def download_stock_data(stock_symbol: str, start_date: date, end_date: date):
 
         # --- Data Processing ---
         if df.empty:
-            print(f"No data returned for {stock_symbol} in the specified period.")
-            return
+            error_msg = f"No data returned for {stock_symbol} in the specified period."
+            print(error_msg)
+            errors.append(error_msg)
+            return None, errors
 
         # Rename columns to a standard format
         # Adjust these names if nsepython changes its output format
@@ -82,37 +85,43 @@ def download_stock_data(stock_symbol: str, start_date: date, end_date: date):
         # Select only the columns we need and rename them
         ohlcv_columns = list(column_mapping.keys())
         if not all(col in df.columns for col in ohlcv_columns):
-             print(f"Error: Expected columns not found in data for {stock_symbol}.")
-             print(f"Available columns: {df.columns.tolist()}")
-             # Attempt to find similar columns (example heuristic, might need refinement)
-             potential_mappings = {
-                 'date': ['Date', 'CH_TIMESTAMP', 'timestamp'],
-                 'open': ['Open', 'CH_OPENING_PRICE', 'open'],
-                 'high': ['High', 'CH_TRADE_HIGH_PRICE', 'high'],
-                 'low': ['Low', 'CH_TRADE_LOW_PRICE', 'low'],
-                 'close': ['Close', 'CH_CLOSING_PRICE', 'close'],
-                 'volume': ['Volume', 'CH_TOT_TRADED_QTY', 'volume']
-             }
-             found_mapping = {}
-             for target, potentials in potential_mappings.items():
-                 for potential in potentials:
-                     if potential in df.columns:
-                         found_mapping[potential] = target
-                         break
-                 else: # If no potential column was found for the target
-                     print(f"Warning: Could not find a column for '{target}'")
+            error_msg = f"Error: Expected columns not found in data for {stock_symbol}."
+            print(error_msg)
+            print(f"Available columns: {df.columns.tolist()}")
+            errors.append(error_msg)
+            # Attempt to find similar columns (example heuristic, might need refinement)
+            potential_mappings = {
+                'date': ['Date', 'CH_TIMESTAMP', 'timestamp'],
+                'open': ['Open', 'CH_OPENING_PRICE', 'open'],
+                'high': ['High', 'CH_TRADE_HIGH_PRICE', 'high'],
+                'low': ['Low', 'CH_TRADE_LOW_PRICE', 'low'],
+                'close': ['Close', 'CH_CLOSING_PRICE', 'close'],
+                'volume': ['Volume', 'CH_TOT_TRADED_QTY', 'volume']
+            }
+            found_mapping = {}
+            for target, potentials in potential_mappings.items():
+                for potential in potentials:
+                    if potential in df.columns:
+                        found_mapping[potential] = target
+                        break
+                else: # If no potential column was found for the target
+                    warning_msg = f"Warning: Could not find a column for '{target}'"
+                    print(warning_msg)
+                    errors.append(warning_msg)
 
-             if len(found_mapping) < 6: # Check if we found enough columns
-                 print("Error: Could not map essential OHLCV columns. Aborting.")
-                 return
-             else:
-                 print(f"Attempting to use inferred column mapping: {found_mapping}")
-                 df = df[list(found_mapping.keys())].rename(columns=found_mapping)
-                 # Ensure correct column order after potential inference
-                 df = df[['Date', 'Open', 'High', 'Low', 'Close', 'Volume']]
+            if len(found_mapping) < 6: # Check if we found enough columns
+                error_msg = "Error: Could not map essential OHLCV columns. Aborting."
+                print(error_msg)
+                errors.append(error_msg)
+                return None, errors
+            else:
+                print(f"Attempting to use inferred column mapping: {found_mapping}")
+                df = df[list(found_mapping.keys())].rename(columns=found_mapping)
+                # Ensure correct column order after potential inference
+                df = df[['Date', 'Open', 'High', 'Low', 'Close', 'Volume']]
 
         else:
-             df = df[ohlcv_columns].rename(columns=column_mapping)
+            df = df[ohlcv_columns].rename(columns=column_mapping)
 
 
         # Convert columns to appropriate types
@@ -128,15 +137,33 @@ def download_stock_data(stock_symbol: str, start_date: date, end_date: date):
         # Sort by date (important for moving average calculation)
         df.sort_values(by='Date', inplace=True)
 
-        # Calculate 200-day moving average
-        df['MA'] = df['Close'].rolling(200).mean().round(2)
-        df = df.dropna().reset_index(drop=True)
-        return df
+        # Reset index after sorting
+        df = df.reset_index(drop=True)
+
+        # Debug: Check if DataFrame became empty after processing
+        if df.empty:
+            print(f"Warning: DataFrame became empty after processing for {stock_symbol}")
+            print(f"Check if data has valid OHLCV values")
+
+        return df, errors
 
     except Exception as e:
-        print(f"An error occurred while fetching or processing data for {stock_symbol}: {e}")
+        error_msg = f"An error occurred while fetching or processing data for {stock_symbol}: {e}"
+        print(error_msg)
         import traceback
         traceback.print_exc() # Print detailed traceback for debugging
+        errors.append(error_msg)
+        return None, errors
+
+
+def get_stock_file_path(symbol):
+    """
+    Get the file path for a stock symbol, handling the & character for file naming.
+    This ensures symbols like M&M Finance can be saved as valid filenames.
+    """
+    # Only replace & with AND for file naming
+    file_safe_symbol = symbol.replace('&', '-')
+    return DATA_DIR / f"{file_safe_symbol}.csv"
 
 
 def sync_data(initial_years=DEFAULT_INITIAL_YEARS):
@@ -170,7 +197,7 @@ def sync_data(initial_years=DEFAULT_INITIAL_YEARS):
 
     # Use tqdm for progress bar
     for symbol in tqdm(stocks, desc="Syncing Data", unit="stock"):
-        file_path = DATA_DIR / f"{symbol}.csv"
+        file_path = get_stock_file_path(symbol)
         time.sleep(0.1) # Small delay per stock to avoid rapid-fire requests
 
         # --- Case 1: File does NOT exist ---
@@ -178,7 +205,7 @@ def sync_data(initial_years=DEFAULT_INITIAL_YEARS):
             print(f"\n[{symbol}] File not found. Performing initial download ({initial_years} years).")
             start_date = target_date - timedelta(days=initial_years * 365)
 
-            new_data_df = download_stock_data(symbol, start_date, target_date)
+            new_data_df, errors = download_stock_data(symbol, start_date, target_date)
 
             if new_data_df is not None and not new_data_df.empty:
                 try:
@@ -201,7 +228,7 @@ def sync_data(initial_years=DEFAULT_INITIAL_YEARS):
             if existing_df.empty:
                 print(f"\n[{symbol}] Existing file is empty. Attempting full redownload ({initial_years} years).")
                 start_date = target_date - timedelta(days=initial_years * 365)
-                new_data_df = download_stock_data(symbol, start_date, target_date)
+                new_data_df, errors = download_stock_data(symbol, start_date, target_date)
                 if new_data_df is not None and not new_data_df.empty:
                     new_data_df.to_csv(file_path, date_format='%Y-%m-%d', index=False)
                     print(f"[{symbol}] Redownload successful.")
@@ -232,7 +259,7 @@ def sync_data(initial_years=DEFAULT_INITIAL_YEARS):
 
             # Download only the new data portion
             tqdm.write(f"[{symbol}] Updating from {start_update_date.date()} to {target_date.date()}")
-            new_data_df = download_stock_data(symbol, start_update_date, target_date)
+            new_data_df, errors = download_stock_data(symbol, start_update_date, target_date)
 
             # If download failed
             if new_data_df is None:

@@ -11,6 +11,9 @@ import logging
 import re
 import urllib.parse
 
+api_logger = logging.getLogger("api")
+api_logger.setLevel(logging.CRITICAL)
+
 mode = 'local'
 
 if (mode == 'vpn'):
@@ -193,7 +196,7 @@ def oi_chain_builder(symbol, expiry="latest", oi_mode="full"):
                         oi_row['PUTS_Bid Qty'], oi_row['PUTS_Bid Price'], oi_row['PUTS_Ask Price'], oi_row[
                             'PUTS_Ask Qty'] = 0, 0, 0, 0
             else:
-                logging.info(m)
+                api_logger.info(m)
 
             if (oi_mode == 'full'):
                 oi_row['CALLS_Chart'], oi_row['PUTS_Chart'] = 0, 0
@@ -436,7 +439,7 @@ def nse_past_results(symbol):
 
 
 def expiry_list(symbol, type="list"):
-    logging.info("Getting Expiry List of: " + symbol)
+    api_logger.info("Getting Expiry List of: " + symbol)
 
     if (type != "list"):
         payload = nse_optionchain_scrapper(symbol)
@@ -616,6 +619,8 @@ def black_scholes_dexter(S0, X, t, σ="", r=10, q=0.0, td=365):
 
 def equity_history_virgin(symbol, series, start_date, end_date):
     # url="https://www.nseindia.com/api/historical/cm/equity?symbol="+symbol+"&series=[%22"+series+"%22]&from="+str(start_date)+"&to="+str(end_date)+""
+    # Use nsesymbolpurify to handle symbols with special characters like &
+    symbol = nsesymbolpurify(symbol)
     url = 'https://www.nseindia.com/api/historical/cm/equity?symbol=' + symbol + '&series=["' + series + '"]&from=' + start_date + '&to=' + end_date
 
     payload = nsefetch(url)
@@ -627,31 +632,31 @@ def equity_history(symbol, series, start_date, end_date):
     # We are getting the input in text. So it is being converted to Datetime object from String.
     start_date = datetime.datetime.strptime(start_date, "%d-%m-%Y")
     end_date = datetime.datetime.strptime(end_date, "%d-%m-%Y")
-    logging.info("Starting Date: " + str(start_date))
-    logging.info("Ending Date: " + str(end_date))
+    api_logger.info("Starting Date: " + str(start_date))
+    api_logger.info("Ending Date: " + str(end_date))
 
     # We are calculating the difference between the days
     diff = end_date - start_date
-    logging.info("Total Number of Days: " + str(diff.days))
-    logging.info("Total FOR Loops in the program: " + str(int(diff.days / 40)))
-    logging.info("Remainder Loop: " + str(diff.days - (int(diff.days / 40) * 40)))
+    api_logger.info("Total Number of Days: " + str(diff.days))
+    api_logger.info("Total FOR Loops in the program: " + str(int(diff.days / 40)))
+    api_logger.info("Remainder Loop: " + str(diff.days - (int(diff.days / 40) * 40)))
 
     total = pd.DataFrame()
     for i in range(0, int(diff.days / 40)):
         temp_date = (start_date + datetime.timedelta(days=(40))).strftime("%d-%m-%Y")
         start_date = datetime.datetime.strftime(start_date, "%d-%m-%Y")
 
-        logging.info("Loop = " + str(i))
-        logging.info("====")
-        logging.info("Starting Date: " + str(start_date))
-        logging.info("Ending Date: " + str(temp_date))
-        logging.info("====")
+        api_logger.info("Loop = " + str(i))
+        api_logger.info("====")
+        api_logger.info("Starting Date: " + str(start_date))
+        api_logger.info("Ending Date: " + str(temp_date))
+        api_logger.info("====")
 
         # total=total.append(equity_history_virgin(symbol,series,start_date,temp_date))
         # total=total.concat(equity_history_virgin(symbol,series,start_date,temp_date))
         total = pd.concat([total, equity_history_virgin(symbol, series, start_date, temp_date)])
 
-        logging.info("Length of the Table: " + str(len(total)))
+        api_logger.info("Length of the Table: " + str(len(total)))
 
         # Preparation for the next loop
         start_date = datetime.datetime.strptime(temp_date, "%d-%m-%Y")
@@ -659,18 +664,18 @@ def equity_history(symbol, series, start_date, end_date):
     start_date = datetime.datetime.strftime(start_date, "%d-%m-%Y")
     end_date = datetime.datetime.strftime(end_date, "%d-%m-%Y")
 
-    logging.info("End Loop")
-    logging.info("====")
-    logging.info("Starting Date: " + str(start_date))
-    logging.info("Ending Date: " + str(end_date))
-    logging.info("====")
+    api_logger.info("End Loop")
+    api_logger.info("====")
+    api_logger.info("Starting Date: " + str(start_date))
+    api_logger.info("Ending Date: " + str(end_date))
+    api_logger.info("====")
 
     # total=total.append(equity_history_virgin(symbol,series,start_date,end_date))
     # total=total.concat(equity_history_virgin(symbol,series,start_date,end_date))
     total = pd.concat([total, equity_history_virgin(symbol, series, start_date, end_date)])
 
-    logging.info("Finale")
-    logging.info("Length of the Total Dataset: " + str(len(total)))
+    api_logger.info("Finale")
+    api_logger.info("Length of the Total Dataset: " + str(len(total)))
     payload = total.iloc[::-1].reset_index(drop=True)
     return payload
 
@@ -694,8 +699,8 @@ def derivative_history_virgin(symbol, start_date, end_date, instrumentType, expi
     nsefetch_url = "https://www.nseindia.com/api/historical/fo/derivatives?&from=" + str(start_date) + "&to=" + str(
         end_date) + "&optionType=" + optionType + "&strikePrice=" + strikePrice + "&expiryDate=" + expiry_date + "&instrumentType=" + instrumentType + "&symbol=" + symbol + ""
     payload = nsefetch(nsefetch_url)
-    logging.info(nsefetch_url)
-    logging.info(payload)
+    api_logger.info(nsefetch_url)
+    api_logger.info(payload)
     return pd.DataFrame.from_records(payload["data"])
 
 
@@ -703,32 +708,32 @@ def derivative_history(symbol, start_date, end_date, instrumentType, expiry_date
     # We are getting the input in text. So it is being converted to Datetime object from String.
     start_date = datetime.datetime.strptime(start_date, "%d-%m-%Y")
     end_date = datetime.datetime.strptime(end_date, "%d-%m-%Y")
-    logging.info("Starting Date: " + str(start_date))
-    logging.info("Ending Date: " + str(end_date))
+    api_logger.info("Starting Date: " + str(start_date))
+    api_logger.info("Ending Date: " + str(end_date))
 
     # We are calculating the difference between the days
     diff = end_date - start_date
-    logging.info("Total Number of Days: " + str(diff.days))
-    logging.info("Total FOR Loops in the program: " + str(int(diff.days / 40)))
-    logging.info("Remainder Loop: " + str(diff.days - (int(diff.days / 40) * 40)))
+    api_logger.info("Total Number of Days: " + str(diff.days))
+    api_logger.info("Total FOR Loops in the program: " + str(int(diff.days / 40)))
+    api_logger.info("Remainder Loop: " + str(diff.days - (int(diff.days / 40) * 40)))
 
     total = pd.DataFrame()
     for i in range(0, int(diff.days / 40)):
         temp_date = (start_date + datetime.timedelta(days=(40))).strftime("%d-%m-%Y")
         start_date = datetime.datetime.strftime(start_date, "%d-%m-%Y")
 
-        logging.info("Loop = " + str(i))
-        logging.info("====")
-        logging.info("Starting Date: " + str(start_date))
-        logging.info("Ending Date: " + str(temp_date))
-        logging.info("====")
+        api_logger.info("Loop = " + str(i))
+        api_logger.info("====")
+        api_logger.info("Starting Date: " + str(start_date))
+        api_logger.info("Ending Date: " + str(temp_date))
+        api_logger.info("====")
 
         # total=total.append(derivative_history_virgin(symbol,start_date,temp_date,instrumentType,expiry_date,strikePrice,optionType))
         # total=total.concat([total, derivative_history_virgin(symbol,start_date,temp_date,instrumentType,expiry_date,strikePrice,optionType)])
         total = pd.concat([total, derivative_history_virgin(symbol, start_date, temp_date, instrumentType, expiry_date,
                                                             strikePrice, optionType)])
 
-        logging.info("Length of the Table: " + str(len(total)))
+        api_logger.info("Length of the Table: " + str(len(total)))
 
         # Preparation for the next loop
         start_date = datetime.datetime.strptime(temp_date, "%d-%m-%Y")
@@ -736,11 +741,11 @@ def derivative_history(symbol, start_date, end_date, instrumentType, expiry_date
     start_date = datetime.datetime.strftime(start_date, "%d-%m-%Y")
     end_date = datetime.datetime.strftime(end_date, "%d-%m-%Y")
 
-    logging.info("End Loop")
-    logging.info("====")
-    logging.info("Starting Date: " + str(start_date))
-    logging.info("Ending Date: " + str(end_date))
-    logging.info("====")
+    api_logger.info("End Loop")
+    api_logger.info("====")
+    api_logger.info("Starting Date: " + str(start_date))
+    api_logger.info("Ending Date: " + str(end_date))
+    api_logger.info("====")
 
     # total=total.append(derivative_history_virgin(symbol,start_date,end_date,instrumentType,expiry_date,strikePrice,optionType))
     # total = total.concat([total, derivative_history_virgin(symbol,start_date,end_date,instrumentType,expiry_date,strikePrice,optionType)])
@@ -748,8 +753,8 @@ def derivative_history(symbol, start_date, end_date, instrumentType, expiry_date
                        derivative_history_virgin(symbol, start_date, end_date, instrumentType, expiry_date, strikePrice,
                                                  optionType)])
 
-    logging.info("Finale")
-    logging.info("Length of the Total Dataset: " + str(len(total)))
+    api_logger.info("Finale")
+    api_logger.info("Length of the Total Dataset: " + str(len(total)))
     payload = total.iloc[::-1].reset_index(drop=True)
     return payload
 
@@ -972,7 +977,7 @@ def nse_largedeals_historical(from_date, to_date, mode="bulk_deals"):
         mode = "block-deals"
 
     url = 'https://www.nseindia.com/api/historical/' + mode + '?from=' + from_date + '&to=' + to_date
-    logging.info("Fetching " + str(url))
+    api_logger.info("Fetching " + str(url))
     payload = nsefetch(url)
     return pd.DataFrame(payload["data"])
 

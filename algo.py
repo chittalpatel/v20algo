@@ -2,6 +2,7 @@ from datetime import date
 from typing import Union, List
 import pandas as pd
 from config import DATA_DIR
+from sync_data import get_stock_file_path
 
 
 class Price:
@@ -27,10 +28,31 @@ class Price:
 
 
 def get_daily_price(stock: str, days: int) -> List[Price]:
-    file_path = DATA_DIR / f"{stock}.csv"
+    file_path = get_stock_file_path(stock)
     data = pd.read_csv(file_path, index_col='Date', parse_dates=True)
+
+    # Read extra data to ensure we have enough for MA calculation
+    # We need at least 200 days + the requested days
+    required_data_points = days + 200
+
+    if len(data) < required_data_points:
+        # If we don't have enough data, use all available data
+        data_for_ma = data
+    else:
+        # Take the most recent required_data_points
+        data_for_ma = data.tail(required_data_points)
+
+    # Calculate 200-day moving average
+    data_for_ma['MA'] = data_for_ma['Close'].rolling(200).mean().round(2)
+
+    # Remove rows where MA is NaN (first 199 rows)
+    data_with_ma = data_for_ma.dropna(subset=['MA'])
+
+    # Take the last 'days' rows that have valid MA
+    final_data = data_with_ma.tail(days)
+
     clean_data = []
-    for idx, row in data.tail(days).iterrows():
+    for idx, row in final_data.iterrows():
         clean_data.append(
             Price(
                 _date=idx.date(),
