@@ -263,8 +263,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Handle different data types
             if (column === 'profit_margin' || column === 'v20margin' || column === 'ma' || column === 'low_price' || column === 'high_price') {
-                aVal = parseFloat(aVal.replace(/[^\\d.-]/g, ''));
-                bVal = parseFloat(bVal.replace(/[^\\d.-]/g, ''));
+                aVal = parseFloat(aVal.replace(/[^0-9.-]+/g, '')) || 0;
+                bVal = parseFloat(bVal.replace(/[^0-9.-]+/g, '')) || 0;
             } else if (column === 'low_date' || column === 'high_date') {
                 aVal = new Date(aVal.split('-').reverse().join('-'));
                 bVal = new Date(bVal.split('-').reverse().join('-'));
