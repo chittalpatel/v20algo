@@ -24,8 +24,5 @@ ProtectSystem=strict
 ProtectHome=true
 ReadWritePaths=/home/ubuntu/v20algo
 
-# Network
-BindIPv6Only=both
-
 [Install]
 WantedBy=multi-user.target
