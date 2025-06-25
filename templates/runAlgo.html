@@ -86,7 +86,8 @@
                                 <thead>
                                     <tr>
                                         <th class="sortable" data-sort="stock">Stock</th>
-                                        <th class="sortable" data-sort="margin">Margin %</th>
+                                        <th class="sortable" data-sort="profit_margin">Profit Margin %</th>
+                                        <th class="sortable" data-sort="v20margin">V20 Margin %</th>
                                         <th class="sortable" data-sort="ma">200MA(₹)</th>
                                         <th class="sortable" data-sort="low_date">Start Date</th>
                                         <th class="sortable" data-sort="low_price">Low Price(₹)</th>
@@ -102,7 +103,8 @@
                                                 {{ r.stock }}
                                             </a>
                                         </td>
-                                        <td data-label="Margin %" class="margin-cell">{{ r.margin }}%</td>
+                                        <td data-label="Profit Margin %" class="profit-margin-cell">{{ r.profit_margin }}%</td>
+                                        <td data-label="V20 Margin %" class="v20margin-cell">{{ r.v20margin }}%</td>
                                         <td data-label="200MA" class="ma-cell">{{ r.ma }}</td>
                                         <td data-label="Start Date" class="date-cell">{{ r.low_date }}</td>
                                         <td data-label="Low Price" class="price-cell">{{ r.low_price }}</td>
@@ -126,8 +128,12 @@
                                     <a href="https://www.tradingview.com/symbols/NSE-{{ r.stock }}/" target="_blank" class="font-weight-bold text-uppercase stock-link">{{ r.stock }}</a>
                                 </div>
                                 <div class="d-flex justify-content-between mb-1">
-                                    <span class="font-weight-bold text-success">Margin %</span>
-                                    <span class="font-weight-bold text-success">{{ r.margin }}%</span>
+                                    <span class="font-weight-bold text-success">Profit Margin %</span>
+                                    <span class="font-weight-bold text-success">{{ r.profit_margin }}%</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span class="font-weight-bold text-success">V20 Margin %</span>
+                                    <span class="font-weight-bold text-success">{{ r.v20margin }}%</span>
                                 </div>
                                 <div class="d-flex justify-content-between mb-1">
                                     <span class="font-weight-bold text-primary">200MA</span>

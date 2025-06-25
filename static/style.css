@@ -410,6 +410,12 @@ label {
     color: #007bff;
 }
 
+.results-table .profit-margin-cell {
+    font-weight: 700;
+    color: #28a745;
+    font-size: 1rem;
+}
+
 /* Custom scrollbar styling */
 .results-table tbody::-webkit-scrollbar {
     width: 10px;

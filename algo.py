@@ -82,14 +82,15 @@ class Algo:
         low = self.prices[start]
         high = self.prices[start]
         valid = False
+        close_margin = None  # To store profit potential
         while end < self.n and self.prices[end].is_green:
             if self.prices[end].low < low.low:
                 low = self.prices[end]
             if self.prices[end].high > high.high:
                 high = self.prices[end]
             end += 1
-        margin = 100 * (high.high/low.low - 1)
-        if margin > self.margin:
+        v20margin = 100 * (high.high/low.low - 1)
+        if v20margin > self.margin:
             if self.filter_by_last_close:
                 close = self.prices[-1].close
                 close_margin = 100 * (high.high/close - 1)
@@ -99,10 +100,13 @@ class Algo:
                     valid = False
             else:
                 valid = True
+                close = self.prices[-1].close
+                close_margin = 100 * (high.high/close - 1)
         if valid:
             self.ans.append({
                 'stock': self.stock,
-                'margin': round(margin, 2),
+                'profit_margin': round(close_margin, 2) if close_margin is not None else None,
+                'v20margin': round(v20margin, 2),
                 'ma': round(self.prices[start-1].ma, 2),
                 'low_date': low.fdate,
                 'low_price': round(low.low, 2),
