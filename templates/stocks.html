@@ -44,8 +44,37 @@
     </div>
 </footer>
 
+{% if success %}
+<!-- Success Toast -->
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+  <div id="successToast" class="toast align-items-center custom-toast" role="alert" aria-live="assertive" aria-atomic="true" data-autohide="true" data-delay="4000">
+    <div class="d-flex">
+      <div class="toast-body d-flex align-items-center">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <circle cx="14" cy="14" r="11" stroke="#2DE1C2" stroke-width="2"/>
+          <path d="M8 15L13 20L20 10" stroke="#2DE1C2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Stocks updated successfully!
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var toastEl = document.getElementById('successToast');
+    var toast = new bootstrap.Toast(toastEl, { autohide: true, delay: 4000 });
+    toast.show();
+  });
+</script>
+{% endif %}
+
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Other JS can go here if needed
+  });
+</script>
 </body>
 </html>

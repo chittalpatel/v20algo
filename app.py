@@ -22,6 +22,7 @@ def stock():
         stocks = request.form["stocks"].splitlines()
         with open(STOCKS_FILE, "w+") as fi:
             fi.write("\n".join(stocks))
+        return render_template("stocks.html", stocks="\n".join(stocks), success=True)
     return render_template("stocks.html", stocks="\n".join(stocks))
 
 

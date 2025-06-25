@@ -733,3 +733,44 @@ label {
     max-height: 0;
     padding: 0;
 }
+
+/* Custom Toast Styles */
+.custom-toast {
+    background: #2d3748 !important;
+    color: #fff !important;
+    border-radius: 1rem !important;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+    font-family: 'Inter', sans-serif;
+    font-size: 1.1rem;
+    border: none !important;
+    min-width: 320px;
+    animation: toast-fade-in 0.7s cubic-bezier(0.4,0,0.2,1);
+    opacity: 1;
+    transition: opacity 0.5s;
+}
+.custom-toast.hide, .custom-toast[aria-hidden="true"] {
+    opacity: 0;
+    animation: toast-fade-out 0.5s cubic-bezier(0.4,0,0.2,1);
+}
+@keyframes toast-fade-in {
+    from { opacity: 0; transform: translateY(-30px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes toast-fade-out {
+    from { opacity: 1; transform: translateY(0) scale(1); }
+    to { opacity: 0; transform: translateY(-20px) scale(0.98); }
+}
+.custom-toast .toast-body svg {
+    margin-right: 0.75rem;
+    stroke: #38b2ac; /* teal, or use your primary color */
+}
+.custom-toast .btn-close {
+    filter: invert(1) grayscale(1) brightness(2);
+}
+
+/* Ensure toast is at top right */
+.toast-container.position-fixed.top-0.end-0 {
+    right: 0 !important;
+    top: 0 !important;
+    left: auto !important;
+}

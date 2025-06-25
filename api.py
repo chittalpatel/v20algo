@@ -1031,3 +1031,25 @@ def security_wise_archive(from_date, to_date, symbol, series="ALL"):
     url = f"{base_url}?from={from_date}&to={to_date}&symbol={symbol.upper()}&dataType=priceVolumeDeliverable&series={series.upper()}"
     payload = nsefetch(url)
     return pd.DataFrame(payload['data'])
+
+
+def is_suspended(symbol):
+    """
+    Returns (True, status_string) if the stock is suspended (permanent or temporary), else (False, status_string).
+    status_string gives details from NSE API fields.
+    """
+    try:
+        payload = nse_eq(symbol)
+        info = payload.get('info', {})
+        metadata = payload.get('metadata', {})
+        security_info = payload.get('securityInfo', {})
+        # Check all possible suspension indicators
+        if info.get('isSuspended', False):
+            return True, metadata.get('status', 'Suspended')
+        if security_info.get('tradingStatus', '').lower() == 'suspended':
+            return True, metadata.get('status', 'Suspended')
+        if metadata.get('status', '').lower().find('suspend') != -1:
+            return True, metadata.get('status', 'Suspended')
+        return False, metadata.get('status', 'Active')
+    except Exception as e:
+        return False, f"Error checking suspension: {e}"

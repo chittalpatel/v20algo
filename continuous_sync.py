@@ -6,7 +6,7 @@ import random
 import logging
 import holidays
 from datetime import date
-from api import equity_history
+from api import equity_history, is_suspended
 from config import DATA_DIR, STOCKS_FILE, DEFAULT_INITIAL_YEARS, MASTER_STOCKS_FILE
 from sync_data import ensure_data_dir, get_stock_list, download_stock_data, get_stock_file_path
 
@@ -26,6 +26,9 @@ logger = logging.getLogger(__name__)
 
 # Initialize Indian holidays calendar
 indian_holidays = holidays.India()
+
+# Global set to track suspended stocks
+suspended_stocks = set()
 
 
 def get_previous_trading_day(target_date=None):
@@ -98,8 +101,10 @@ def is_data_fresh(file_path, fresh_threshold):
 
 def sync_single_stock(symbol, fresh_threshold):
     """
-    Sync a single stock
+    Sync a single stock.
     """
+    if symbol in suspended_stocks:
+        return False, "suspended"
     file_path = get_stock_file_path(symbol)
 
     try:
@@ -122,6 +127,12 @@ def sync_single_stock(symbol, fresh_threshold):
                         logger.info(f"{symbol}: Initial download SUCCESS")
                         return True, "initial_download"
                     else:
+                        # Check for suspension only if download failed
+                        suspended, status_str = is_suspended(symbol)
+                        if suspended:
+                            logger.info(f"{symbol}: Suspended ({status_str}), skipping further attempts.")
+                            suspended_stocks.add(symbol)
+                            return False, "suspended"
                         logger.error(f"{symbol}: Initial download FAILED")
                         return False, "download_failed"
 
@@ -144,7 +155,13 @@ def sync_single_stock(symbol, fresh_threshold):
                     logger.error(f"{symbol}: {error}")
 
                 if new_data_df is None:
-                    logger.error(f"{symbol}: Update FAILED")
+                    # Check for suspension only if download failed
+                    suspended, status_str = is_suspended(symbol)
+                    if suspended:
+                        logger.info(f"{symbol}: Suspended ({status_str}), skipping further attempts.")
+                        suspended_stocks.add(symbol)
+                        return False, "suspended"
+                    logger.error(f"{symbol}: Update download FAILED")
                     return False, "download_failed"
                 elif new_data_df.empty:
                     # Check if this is because no new data exists or data processing failed
@@ -181,6 +198,12 @@ def sync_single_stock(symbol, fresh_threshold):
                 logger.info(f"{symbol}: Initial download SUCCESS")
                 return True, "initial_download"
             else:
+                # Check for suspension only if download failed
+                suspended, status_str = is_suspended(symbol)
+                if suspended:
+                    logger.info(f"{symbol}: Suspended ({status_str}), skipping further attempts.")
+                    suspended_stocks.add(symbol)
+                    return False, "suspended"
                 logger.error(f"{symbol}: Initial download FAILED")
                 return False, "download_failed"
 
@@ -195,15 +218,15 @@ def continuous_sync():
     """
     ensure_data_dir()
 
-    try:
-        stocks = get_stock_list()
-    except (FileNotFoundError, ValueError) as e:
-        logger.error(f"Error: {e}")
-        return
-
-    logger.info(f"Starting continuous sync for {len(stocks)} stocks")
+    logger.info("Starting continuous sync loop")
 
     while True:
+        try:
+            stocks = get_stock_list()  # Reload every cycle
+        except (FileNotFoundError, ValueError) as e:
+            logger.error(f"Error: {e}")
+            return
+
         fresh_threshold = get_fresh_data_threshold()
 
         # Track results for this cycle
@@ -213,12 +236,16 @@ def continuous_sync():
             "initial_download": 0,
             "no_new_data": 0,
             "failed": 0,
-            "file_error": 0
+            "file_error": 0,
+            "suspended": 0
         }
 
-        # Check which stocks need syncing
+        # Check which stocks need syncing, excluding suspended
         stocks_to_sync = []
         for symbol in stocks:
+            if symbol in suspended_stocks:
+                cycle_stats["suspended"] += 1
+                continue
             file_path = get_stock_file_path(symbol)
             if not is_data_fresh(file_path, fresh_threshold):
                 stocks_to_sync.append(symbol)
@@ -243,7 +270,9 @@ def continuous_sync():
                 else:
                     cycle_stats["updated"] += 1
             else:
-                if "file_error" in status:
+                if status == "suspended":
+                    cycle_stats["suspended"] += 1
+                elif "file_error" in status:
                     cycle_stats["file_error"] += 1
                 else:
                     cycle_stats["failed"] += 1
@@ -254,7 +283,7 @@ def continuous_sync():
         # Print cycle summary
         logger.info(f"Cycle Summary - Fresh: {cycle_stats['fresh']}, Updated: {cycle_stats['updated']}, "
                    f"Initial: {cycle_stats['initial_download']}, No Data: {cycle_stats['no_new_data']}, "
-                   f"Failed: {cycle_stats['failed']}, File Errors: {cycle_stats['file_error']}")
+                   f"Failed: {cycle_stats['failed']}, File Errors: {cycle_stats['file_error']}, Suspended: {cycle_stats['suspended']}")
 
 
 def main():
