@@ -175,3 +175,7 @@ cython_debug/
 
 data/
 .idea/
+
+*.zip
+.DS_Store
+stocks
