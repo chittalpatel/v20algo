@@ -175,8 +175,8 @@ def sync_single_stock(symbol, fresh_threshold):
                     # Combine old and new data
                     combined_df = pd.concat([existing_df, new_data_df])
                     # INSERT_YOUR_CODE
-                    logger.debug(f"{symbol}: Existing DataFrame (last 3 rows):\n{existing_df.tail(3)}")
-                    logger.debug(f"{symbol}: New DataFrame (last 3 rows):\n{new_data_df.tail(3)}")
+                    logger.info(f"{symbol}: Existing DataFrame (last 3 rows):\n{existing_df.tail(3)}")
+                    logger.info(f"{symbol}: New DataFrame (last 3 rows):\n{new_data_df.tail(3)}")
                     combined_df = combined_df[~combined_df.index.duplicated(keep='last')]
                     combined_df.sort_index(inplace=True)
                     combined_df.to_csv(file_path, date_format='%Y-%m-%d', index=False)
