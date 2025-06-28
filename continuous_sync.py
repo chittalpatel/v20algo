@@ -123,6 +123,12 @@ def sync_single_stock(symbol, fresh_threshold):
                         logger.error(f"{symbol}: {error}")
 
                     if new_data_df is not None and not new_data_df.empty:
+                        # Ensure index is Date and datetime type
+                        if 'Date' in new_data_df.columns:
+                            new_data_df['Date'] = pd.to_datetime(new_data_df['Date'], errors='coerce')
+                            new_data_df = new_data_df.set_index('Date')
+                        # Reindex columns to match existing_df
+                        new_data_df = new_data_df.reindex(columns=existing_df.columns)
                         new_data_df.to_csv(file_path, date_format='%Y-%m-%d', index=False)
                         logger.info(f"{symbol}: Initial download SUCCESS")
                         return True, "initial_download"
@@ -172,14 +178,15 @@ def sync_single_stock(symbol, fresh_threshold):
                         logger.info(f"{symbol}: No new data available")
                         return True, "no_new_data"
                 else:
+                    new_data_df['Date'] = pd.to_datetime(new_data_df['Date'], errors='coerce')
+                    new_data_df = new_data_df.set_index('Date')
+                    # Reindex columns to match existing_df
+                    new_data_df = new_data_df.reindex(columns=existing_df.columns)
                     # Combine old and new data
                     combined_df = pd.concat([existing_df, new_data_df])
-                    # INSERT_YOUR_CODE
-                    logger.info(f"{symbol}: Existing DataFrame (last 3 rows):\n{existing_df.tail(3)}")
-                    logger.info(f"{symbol}: New DataFrame (last 3 rows):\n{new_data_df.tail(3)}")
                     combined_df = combined_df[~combined_df.index.duplicated(keep='last')]
                     combined_df.sort_index(inplace=True)
-                    combined_df.to_csv(file_path, date_format='%Y-%m-%d', index=False)
+                    combined_df.to_csv(file_path, date_format='%Y-%m-%d', index=True)
                     logger.info(f"{symbol}: Update SUCCESS")
                     return True, "updated"
 
