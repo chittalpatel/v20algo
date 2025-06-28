@@ -182,6 +182,8 @@ def sync_single_stock(symbol, fresh_threshold):
 
             except Exception as e:
                 logger.error(f"{symbol}: File error - {e}")
+                import traceback
+                logger.error(traceback.format_exc())
                 return False, f"file_error: {e}"
         else:
             # File doesn't exist, perform initial download
