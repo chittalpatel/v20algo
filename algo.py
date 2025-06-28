@@ -3,7 +3,7 @@ from typing import Union, List
 import pandas as pd
 from config import DATA_DIR
 from sync_data import get_stock_file_path
-
+import os
 
 class Price:
     def __init__(self, _date: Union[str, date], _open: float, close: float, low: float, high: float, volume:float, ma: float):
@@ -29,6 +29,8 @@ class Price:
 
 def get_daily_price(stock: str, days: int) -> List[Price]:
     file_path = get_stock_file_path(stock)
+    if not os.path.exists(file_path):
+        return []
     data = pd.read_csv(file_path, index_col='Date', parse_dates=True)
 
     # Read extra data to ensure we have enough for MA calculation
@@ -82,7 +84,7 @@ class Algo:
         low = self.prices[start]
         high = self.prices[start]
         valid = False
-        close_margin = None  # To store profit potential
+        profit_potential = None  # To store profit potential
         while end < self.n and self.prices[end].is_green:
             if self.prices[end].low < low.low:
                 low = self.prices[end]
@@ -91,21 +93,20 @@ class Algo:
             end += 1
         v20margin = 100 * (high.high/low.low - 1)
         if v20margin > self.margin:
+            close = self.prices[-1].close
+            profit_potential = 100 * (high.high/close - 1)
             if self.filter_by_last_close:
-                close = self.prices[-1].close
-                close_margin = 100 * (high.high/close - 1)
-                if close_margin > self.last_close_margin:
+                close_margin = 100 * (close/low.low - 1)
+                if close_margin <= self.last_close_margin:
                     valid = True
                 else:
                     valid = False
             else:
                 valid = True
-                close = self.prices[-1].close
-                close_margin = 100 * (high.high/close - 1)
         if valid:
             self.ans.append({
                 'stock': self.stock,
-                'profit_margin': round(close_margin, 2) if close_margin is not None else None,
+                'profit_margin': round(profit_potential, 2) if profit_potential is not None else None,
                 'v20margin': round(v20margin, 2),
                 'ma': round(self.prices[start-1].ma, 2),
                 'low_date': low.fdate,

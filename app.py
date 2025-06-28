@@ -32,6 +32,7 @@ def run():
     history = 10
     margin = 20
     last_close_margin = 5
+    filter_by_last_close = True
     if request.method == 'POST':
         history = int(request.form["history"])
         margin = int(request.form["margin"])
@@ -49,7 +50,7 @@ def run():
         global stocks
         _stocks = stocks
 
-    return render_template("runAlgo.html", stocks="\n".join(_stocks), result=result or ["No results!"], history=history, margin=margin, last_close_margin=last_close_margin)
+    return render_template("runAlgo.html", stocks="\n".join(_stocks), result=result or ["No results!"], history=history, margin=margin, last_close_margin=last_close_margin, filter_by_last_close=filter_by_last_close)
 
 
 if __name__ == '__main__':

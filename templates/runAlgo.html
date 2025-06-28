@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
 </head>
 <body>
 <nav class="navbar navbar-expand-lg">
@@ -38,7 +39,7 @@
                     </div>
                     <div class="form-group">
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="filter-by-last-close" value="1" id="filter-by-last-close" checked>
+                            <input class="form-check-input" type="checkbox" name="filter-by-last-close" value="1" id="filter-by-last-close" {% if filter_by_last_close %}checked{% endif %}>
                             <label class="form-check-label" for="filter-by-last-close">
                                 Compare with latest price?
                             </label>
@@ -78,6 +79,10 @@
                                         <span class="stat-number" id="uniqueStocks">0</span>
                                         <span class="stat-label">Unique Stocks</span>
                                     </div>
+                                    <div class="stat-item">
+                                        <span class="stat-number" id="totalResults">0</span>
+                                        <span class="stat-label">Total Results</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -86,13 +91,13 @@
                                 <thead>
                                     <tr>
                                         <th class="sortable" data-sort="stock">Stock</th>
-                                        <th class="sortable" data-sort="profit_margin">Profit Margin %</th>
                                         <th class="sortable" data-sort="v20margin">V20 Margin %</th>
                                         <th class="sortable" data-sort="ma">200MA(₹)</th>
                                         <th class="sortable" data-sort="low_date">Start Date</th>
                                         <th class="sortable" data-sort="low_price">Low Price(₹)</th>
                                         <th class="sortable" data-sort="high_date">High Date</th>
                                         <th class="sortable" data-sort="high_price">High Price(₹)</th>
+                                        <th class="sortable" data-sort="profit_margin">Profit Potential %</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -103,13 +108,13 @@
                                                 {{ r.stock }}
                                             </a>
                                         </td>
-                                        <td data-label="Profit Margin %" class="profit-margin-cell">{{ r.profit_margin }}%</td>
                                         <td data-label="V20 Margin %" class="v20margin-cell">{{ r.v20margin }}%</td>
                                         <td data-label="200MA" class="ma-cell">{{ r.ma }}</td>
                                         <td data-label="Start Date" class="date-cell">{{ r.low_date }}</td>
                                         <td data-label="Low Price" class="price-cell">{{ r.low_price }}</td>
                                         <td data-label="High Date" class="date-cell">{{ r.high_date }}</td>
                                         <td data-label="High Price" class="price-cell">{{ r.high_price }}</td>
+                                        <td data-label="Profit Potential %" class="profit-margin-cell">{{ r.profit_margin }}%</td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
@@ -126,10 +131,6 @@
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <span class="font-weight-bold text-uppercase">Stock</span>
                                     <a href="https://www.tradingview.com/symbols/NSE-{{ r.stock }}/" target="_blank" class="font-weight-bold text-uppercase stock-link">{{ r.stock }}</a>
-                                </div>
-                                <div class="d-flex justify-content-between mb-1">
-                                    <span class="font-weight-bold text-success">Profit Margin %</span>
-                                    <span class="font-weight-bold text-success">{{ r.profit_margin }}%</span>
                                 </div>
                                 <div class="d-flex justify-content-between mb-1">
                                     <span class="font-weight-bold text-success">V20 Margin %</span>
@@ -151,9 +152,13 @@
                                     <span class="font-weight-bold text-secondary">High Date</span>
                                     <span class="font-weight-bold text-secondary">{{ r.high_date }}</span>
                                 </div>
-                                <div class="d-flex justify-content-between">
+                                <div class="d-flex justify-content-between mb-1">
                                     <span class="font-weight-bold text-secondary">High Price</span>
                                     <span class="font-weight-bold text-secondary">₹{{ r.high_price }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span class="font-weight-bold text-success">Profit Potential %</span>
+                                    <span class="font-weight-bold text-success">{{ r.profit_margin }}%</span>
                                 </div>
                             </div>
                             {% endfor %}
@@ -190,6 +195,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (visibleRows.length === 0) {
             uniqueStocks.textContent = '0';
+            document.getElementById('totalResults').textContent = '0';
             return;
         }
 
@@ -197,6 +203,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const stocks = visibleRows.map(row => row.querySelector('.stock-cell').textContent);
         const uniqueStocksSet = new Set(stocks);
         uniqueStocks.textContent = uniqueStocksSet.size;
+        document.getElementById('totalResults').textContent = visibleRows.length;
     }
 
     // Search functionality
@@ -284,13 +291,13 @@ document.addEventListener('DOMContentLoaded', function() {
     function getColumnIndex(column) {
         const columnMap = {
             'stock': 1,
-            'profit_margin': 2,
-            'v20margin': 3,
-            'ma': 4,
-            'low_date': 5,
-            'low_price': 6,
-            'high_date': 7,
-            'high_price': 8
+            'v20margin': 2,
+            'ma': 3,
+            'low_date': 4,
+            'low_price': 5,
+            'high_date': 6,
+            'high_price': 7,
+            'profit_margin': 8
         };
         return columnMap[column];
     }
