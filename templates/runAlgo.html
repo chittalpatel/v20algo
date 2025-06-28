@@ -1,25 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Run Algorithm - StockAlgo</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
-</head>
-<body>
-<nav class="navbar navbar-expand-lg">
-    <div class="navbar-nav mx-auto">
-        <a class="nav-link" href="/">Home</a>
-        <a class="nav-link" href="/stocks">Update Stocks</a>
-        <a class="nav-link active" href="/run">Run Algo</a>
-    </div>
-</nav>
+{% extends "base.html" %}
 
+{% block title %}Run Algorithm{% endblock %}
+
+{% block content %}
 <div class="container-fluid px-lg-5 mt-5">
     <div class="row">
         <!-- Algorithm Form Section -->
@@ -174,11 +157,9 @@
         </div>
     </div>
 </div>
+{% endblock %}
 
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
+{% block scripts %}
 <script>
 // Table sorting and searching functionality
 document.addEventListener('DOMContentLoaded', function() {
@@ -382,13 +363,4 @@ document.addEventListener('click', function(e) {
     }
 });
 </script>
-
-<footer class="footer">
-    <div class="container-fluid px-lg-5">
-        <div class="footer-content">
-        </div>
-    </div>
-</footer>
-
-</body>
-</html>
+{% endblock %}
