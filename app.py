@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from flask import Flask
-from flask import render_template, request
+from flask import render_template, request, redirect, url_for
 from algo import Algo
 from config import STOCKS_FILE
 
@@ -12,7 +12,7 @@ with open(STOCKS_FILE) as f:
 
 @app.route('/')
 def index():
-    return render_template("index.html")
+    return redirect(url_for('run'))
 
 
 @app.route('/stocks', methods=['GET', 'POST'])

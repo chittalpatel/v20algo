@@ -1,274 +1,221 @@
 {% extends "base.html" %}
 
-{% block title %}Run Algorithm{% endblock %}
+{% block title %}Algorithms{% endblock %}
 
 {% block content %}
-<div class="container-fluid px-lg-5 mt-5">
-    <div class="row">
-        <!-- Algorithm Form Section -->
-        <div class="col-lg-4">
-            <div class="card-custom">
-                <h2>Run V20 Algorithm</h2>
-                <form method="post" class="mt-4">
-                    <div class="form-row">
-                        <div class="form-group col-md-6">
-                            <label for="history">History (in days)</label>
-                            <input type="text" class="form-control" id="history" name="history" placeholder="e.g., 10" value="{{ history }}">
-                        </div>
-                        <div class="form-group col-md-6">
-                            <label for="margin">Margin (in percentage)</label>
-                            <input type="text" class="form-control" id="margin" name="margin" placeholder="e.g., 20" value="{{ margin }}">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="filter-by-last-close" value="1" id="filter-by-last-close" {% if filter_by_last_close %}checked{% endif %}>
-                            <label class="form-check-label" for="filter-by-last-close">
-                                Compare with latest price?
-                            </label>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="last-close-margin">Margin for latest price comparison (in percentage)</label>
-                        <input type="text" class="form-control" id="last-close-margin" name="last-close-margin" placeholder="e.g., 5" value="{{ last_close_margin }}">
-                    </div>
-                    <div class="form-group">
-                        <label for="stocksTextArea">Stock Symbols</label>
-                        <textarea class="form-control" id="stocksTextArea" name="stocks" rows="10">{{ stocks }}</textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Run Algorithm</button>
-                </form>
+<div class="container">
+    <div class="card-custom mt-2">
+        <h2>V20 Algorithm</h2>
+        <form method="post">
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="history">History (days)</label>
+                    <input type="text" class="form-control" id="history" name="history" placeholder="e.g. 10" value="{{ history }}">
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="margin">Margin (%)</label>
+                    <input type="text" class="form-control" id="margin" name="margin" placeholder="e.g. 20" value="{{ margin }}">
+                </div>
+            </div>
+            <div class="form-check mb-2 mt-2">
+                <input class="form-check-input" type="checkbox" name="filter-by-last-close" value="1" id="filter-by-last-close" {% if filter_by_last_close %}checked{% endif %}>
+                <label class="form-check-label" for="filter-by-last-close">
+                    Compare with latest price
+                </label>
+            </div>
+            <div class="form-group">
+                <label for="last-close-margin">Latest price margin (%)</label>
+                <input type="text" class="form-control" id="last-close-margin" name="last-close-margin" placeholder="e.g. 5" value="{{ last_close_margin }}">
+            </div>
+            <div class="form-group">
+                <label for="stocksTextArea">Stock symbols (one per line)</label>
+                <textarea class="form-control" id="stocksTextArea" name="stocks" rows="8">{{ stocks }}</textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Run</button>
+        </form>
+        <hr class="my-4">
+        <h3 class="mb-3" style="font-size:1.35rem; font-weight:700; color:#222; letter-spacing:0.01em;"><span style="background:linear-gradient(90deg,#1976d2,#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Results</span></h3>
+        <div class="d-flex align-items-center mb-3" style="gap: 1rem;">
+            <div style="flex-basis:37.5%; min-width:0;">
+                <input type="text" class="form-control" id="tableSearch" placeholder="Search stock..." autocomplete="off">
+                <div id="autocomplete-list" class="autocomplete-items empty"></div>
+            </div>
+            <div style="flex-basis:50%; min-width:0; display: flex; align-items: center; justify-content: center;">
+                <label for="sortBySelect" class="mb-0 mr-2 font-weight-bold" style="font-weight:600; color:#222; min-width:60px;">Sort by</label>
+                <select id="sortBySelect" class="form-control" style="min-width: 160px; max-width: 320px;">
+                    <option value="stock-asc">Stock (A-Z)</option>
+                    <option value="stock-desc">Stock (Z-A)</option>
+                    <option value="v20margin-desc">V20 Margin % (High-Low)</option>
+                    <option value="v20margin-asc">V20 Margin % (Low-High)</option>
+                    <option value="ma-desc">200MA (₹) (High-Low)</option>
+                    <option value="ma-asc">200MA (₹) (Low-High)</option>
+                    <option value="low_date-desc">Start Date (Newest)</option>
+                    <option value="low_date-asc">Start Date (Oldest)</option>
+                    <option value="low_price-desc">Low Price (₹) (High-Low)</option>
+                    <option value="low_price-asc">Low Price (₹) (Low-High)</option>
+                    <option value="high_date-desc">High Date (Newest)</option>
+                    <option value="high_date-asc">High Date (Oldest)</option>
+                    <option value="high_price-desc">High Price (₹) (High-Low)</option>
+                    <option value="high_price-asc">High Price (₹) (Low-High)</option>
+                    <option value="profit_margin-desc">Profit Potential % (High-Low)</option>
+                    <option value="profit_margin-asc">Profit Potential % (Low-High)</option>
+                </select>
+            </div>
+            <div style="flex-basis:12.5%; min-width:0; display: flex; justify-content: flex-end;">
+                <span class="results-badge" id="totalResultsBadge">Total: <span id="totalResults">0</span></span>
             </div>
         </div>
-
-        <!-- Results Section -->
-        <div class="col-lg-8">
-            {% if result %}
-                <div class="card-custom">
-                    <h3>Algorithm Results</h3>
-                    {% if result[0] == "No results!" %}
-                        <div class="text-center">
-                            <p class="lead mb-0">No matching results found with the current parameters.</p>
-                        </div>
-                    {% else %}
-                        <div class="row align-items-center mb-4">
-                            <div class="col-md-8">
-                                <input type="text" class="search-box" id="tableSearch" placeholder="Search stock names...">
-                                <div id="autocomplete-list" class="autocomplete-items empty"></div>
-                            </div>
-                            <div class="col-md-4 d-none d-md-block">
-                                <div class="stats-dashboard justify-content-end">
-                                    <div class="stat-item">
-                                        <span class="stat-number" id="uniqueStocks">0</span>
-                                        <span class="stat-label">Unique Stocks</span>
-                                    </div>
-                                    <div class="stat-item">
-                                        <span class="stat-number" id="totalResults">0</span>
-                                        <span class="stat-label">Total Results</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="results-table">
-                            <table id="resultsTable">
-                                <thead>
-                                    <tr>
-                                        <th class="sortable" data-sort="stock">Stock</th>
-                                        <th class="sortable" data-sort="v20margin">V20 Margin %</th>
-                                        <th class="sortable" data-sort="ma">200MA(₹)</th>
-                                        <th class="sortable" data-sort="low_date">Start Date</th>
-                                        <th class="sortable" data-sort="low_price">Low Price(₹)</th>
-                                        <th class="sortable" data-sort="high_date">High Date</th>
-                                        <th class="sortable" data-sort="high_price">High Price(₹)</th>
-                                        <th class="sortable" data-sort="profit_margin">Profit Potential %</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for r in result %}
-                                    <tr>
-                                        <td data-label="Stock" class="stock-cell">
-                                            <a href="https://www.tradingview.com/symbols/NSE-{{ r.stock }}/" target="_blank" class="stock-link">
-                                                {{ r.stock }}
-                                            </a>
-                                        </td>
-                                        <td data-label="V20 Margin %" class="v20margin-cell">{{ r.v20margin }}%</td>
-                                        <td data-label="200MA" class="ma-cell">{{ r.ma }}</td>
-                                        <td data-label="Start Date" class="date-cell">{{ r.low_date }}</td>
-                                        <td data-label="Low Price" class="price-cell">{{ r.low_price }}</td>
-                                        <td data-label="High Date" class="date-cell">{{ r.high_date }}</td>
-                                        <td data-label="High Price" class="price-cell">{{ r.high_price }}</td>
-                                        <td data-label="Profit Potential %" class="profit-margin-cell">{{ r.profit_margin }}%</td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                            <div class="no-results-message" id="noResultsMessage">
-                                <p>No results match your search criteria</p>
-                                <small>Try adjusting your search terms</small>
-                            </div>
-                        </div>
-                        <!-- Mobile cards layout -->
-                        <div class="mobile-results-cards d-block d-md-none mt-3">
-                            {% for r in result %}
-                            <div class="result-card mb-4 p-3">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="font-weight-bold text-uppercase">Stock</span>
-                                    <a href="https://www.tradingview.com/symbols/NSE-{{ r.stock }}/" target="_blank" class="font-weight-bold text-uppercase stock-link">{{ r.stock }}</a>
-                                </div>
-                                <div class="d-flex justify-content-between mb-1">
-                                    <span class="font-weight-bold text-success">V20 Margin %</span>
-                                    <span class="font-weight-bold text-success">{{ r.v20margin }}%</span>
-                                </div>
-                                <div class="d-flex justify-content-between mb-1">
-                                    <span class="font-weight-bold text-primary">200MA</span>
-                                    <span class="font-weight-bold text-primary">₹{{ r.ma }}</span>
-                                </div>
-                                <div class="d-flex justify-content-between mb-1">
-                                    <span class="font-weight-bold text-secondary">Start Date</span>
-                                    <span class="font-weight-bold text-secondary">{{ r.low_date }}</span>
-                                </div>
-                                <div class="d-flex justify-content-between mb-1">
-                                    <span class="font-weight-bold text-secondary">Low Price</span>
-                                    <span class="font-weight-bold text-secondary">₹{{ r.low_price }}</span>
-                                </div>
-                                <div class="d-flex justify-content-between mb-1">
-                                    <span class="font-weight-bold text-secondary">High Date</span>
-                                    <span class="font-weight-bold text-secondary">{{ r.high_date }}</span>
-                                </div>
-                                <div class="d-flex justify-content-between mb-1">
-                                    <span class="font-weight-bold text-secondary">High Price</span>
-                                    <span class="font-weight-bold text-secondary">₹{{ r.high_price }}</span>
-                                </div>
-                                <div class="d-flex justify-content-between mb-1">
-                                    <span class="font-weight-bold text-success">Profit Potential %</span>
-                                    <span class="font-weight-bold text-success">{{ r.profit_margin }}%</span>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
-            {% else %}
-                <div class="card-custom text-center">
-                    <h3>Ready to Run Algorithm</h3>
-                    <p class="lead">Fill out the form on the left and click "Run Algorithm" to see results here.</p>
-                </div>
-            {% endif %}
+        {% if result and result[0] != "No results!" and result|length > 0 %}
+        <div class="results-table position-relative">
+            <table class="table table-hover table-borderless mb-0" id="resultsTable">
+                <thead class="thead-light">
+                    <tr>
+                        <th style="text-align:center; white-space:nowrap;">Stock</th>
+                        <th style="text-align:center; white-space:nowrap;">V20 Margin&nbsp;%</th>
+                        <th style="text-align:center; white-space:nowrap;">200MA <span style="color:#888;">(₹)</span></th>
+                        <th style="text-align:center; white-space:nowrap;">Start Date</th>
+                        <th style="text-align:center; white-space:nowrap;">Low Price <span style="color:#888;">(₹)</span></th>
+                        <th style="text-align:center; white-space:nowrap;">High Date</th>
+                        <th style="text-align:center; white-space:nowrap;">High Price <span style="color:#888;">(₹)</span></th>
+                        <th style="text-align:center; white-space:nowrap;">Profit Potential&nbsp;%</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in result %}
+                    <tr>
+                        <td>{{ r.stock }}</td>
+                        <td>{{ r.v20margin }}%</td>
+                        <td>{{ r.ma }}</td>
+                        <td>{{ r.low_date }}</td>
+                        <td>{{ r.low_price }}</td>
+                        <td>{{ r.high_date }}</td>
+                        <td>{{ r.high_price }}</td>
+                        <td>{{ r.profit_margin }}%</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div class="no-results-message" id="noResultsMessage" style="display:none;">
+                <p>No results match your search criteria</p>
+                <small>Try adjusting your search terms</small>
+            </div>
         </div>
+        {% else %}
+        <div class="no-results-message show" style="display:block;">
+            <p>No results match your search criteria</p>
+            <small>Try adjusting your search terms</small>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-// Table sorting and searching functionality
 document.addEventListener('DOMContentLoaded', function() {
     const table = document.getElementById('resultsTable');
     const searchBox = document.getElementById('tableSearch');
     const noResultsMessage = document.getElementById('noResultsMessage');
-    const uniqueStocks = document.getElementById('uniqueStocks');
-    let currentSort = { column: null, direction: 'asc' };
+    const totalResults = document.getElementById('totalResults');
+    const autocompleteList = document.getElementById('autocomplete-list');
+    const sortBySelect = document.getElementById('sortBySelect');
+    let currentSort = { column: 'stock', direction: 'asc' };
 
-    // Calculate unique stocks
-    function calculateUniqueStocks() {
-        const rows = table.querySelectorAll('tbody tr');
-        const visibleRows = Array.from(rows).filter(row => row.style.display !== 'none');
+    if (!table || !searchBox) return;
 
-        if (visibleRows.length === 0) {
-            uniqueStocks.textContent = '0';
-            document.getElementById('totalResults').textContent = '0';
-            return;
-        }
-
-        // Calculate unique stocks
-        const stocks = visibleRows.map(row => row.querySelector('.stock-cell').textContent);
-        const uniqueStocksSet = new Set(stocks);
-        uniqueStocks.textContent = uniqueStocksSet.size;
-        document.getElementById('totalResults').textContent = visibleRows.length;
-    }
-
-    // Search functionality
-    searchBox.addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase();
+    function updateStats() {
         const rows = table.querySelectorAll('tbody tr');
         let visibleRows = 0;
-
         rows.forEach(row => {
-            // Only match the stock name cell
-            const stockCell = row.querySelector('.stock-cell');
-            let stockName = stockCell ? stockCell.textContent.toLowerCase() : '';
-            if (stockName.includes(searchTerm)) {
+            if (row.style.display !== 'none') {
+                visibleRows++;
+            }
+        });
+        totalResults.textContent = visibleRows;
+    }
+
+    // Autocomplete logic
+    function getAllStockNames() {
+        const tableStocks = Array.from(table.querySelectorAll('tbody tr'));
+        return Array.from(new Set(tableStocks.map(row => row.cells[0].textContent.trim())));
+    }
+    searchBox.addEventListener('input', function() {
+        const val = this.value.toLowerCase();
+        autocompleteList.innerHTML = '';
+        autocompleteList.classList.add('empty');
+        if (!val) return;
+        const stockNames = getAllStockNames();
+        const matches = stockNames.filter(name => name.toLowerCase().includes(val));
+        if (matches.length > 0) autocompleteList.classList.remove('empty');
+        matches.slice(0, 8).forEach(name => {
+            const item = document.createElement('div');
+            item.className = 'autocomplete-item';
+            item.innerHTML = name.replace(new RegExp(val, 'gi'), match => `<strong>${match}</strong>`);
+            item.addEventListener('mousedown', function(e) {
+                searchBox.value = name;
+                searchBox.dispatchEvent(new Event('input'));
+                autocompleteList.innerHTML = '';
+                autocompleteList.classList.add('empty');
+            });
+            autocompleteList.appendChild(item);
+        });
+    });
+    document.addEventListener('click', function(e) {
+        if (e.target !== searchBox) {
+            autocompleteList.innerHTML = '';
+            autocompleteList.classList.add('empty');
+        }
+    });
+
+    // Search and filter table
+    searchBox.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        let visibleRows = 0;
+        table.querySelectorAll('tbody tr').forEach(row => {
+            const stock = row.cells[0].textContent.toLowerCase();
+            if (stock.includes(searchTerm)) {
                 row.style.display = '';
                 visibleRows++;
             } else {
                 row.style.display = 'none';
             }
         });
-
-        // Show/hide no results message
-        if (visibleRows === 0) {
-            noResultsMessage.classList.add('show');
-        } else {
-            noResultsMessage.classList.remove('show');
-        }
-
-        // Update stats
-        calculateUniqueStocks();
-
-        // Also filter mobile cards by stock name only
-        if (window.innerWidth <= 768) {
-            filterMobileCards(searchTerm);
-        }
+        noResultsMessage.style.display = visibleRows === 0 ? '' : 'none';
+        updateStats();
     });
 
-    // Calculate initial stats
-    calculateUniqueStocks();
-
-    // Sorting functionality
-    table.querySelectorAll('th.sortable').forEach(header => {
-        header.addEventListener('click', function() {
-            const column = this.dataset.sort;
-            const direction = currentSort.column === column && currentSort.direction === 'asc' ? 'desc' : 'asc';
-
-            // Update sort indicators
-            table.querySelectorAll('th.sortable').forEach(th => {
-                th.classList.remove('asc', 'desc');
-            });
-            this.classList.add(direction);
-
+    // Sorting functionality using dropdown
+    if (sortBySelect) {
+        sortBySelect.addEventListener('change', function() {
+            const [column, direction] = this.value.split('-');
             currentSort = { column, direction };
             sortTable(column, direction);
         });
-    });
-
+        // Initial sort
+        const [initCol, initDir] = sortBySelect.value.split('-');
+        sortTable(initCol, initDir);
+    }
     function sortTable(column, direction) {
         const tbody = table.querySelector('tbody');
         const rows = Array.from(tbody.querySelectorAll('tr'));
-
         rows.sort((a, b) => {
             let aVal = a.querySelector(`td:nth-child(${getColumnIndex(column)})`).textContent;
             let bVal = b.querySelector(`td:nth-child(${getColumnIndex(column)})`).textContent;
-
-            // Handle different data types
-            if (column === 'profit_margin' || column === 'v20margin' || column === 'ma' || column === 'low_price' || column === 'high_price') {
+            if (["profit_margin", "v20margin", "ma", "low_price", "high_price"].includes(column)) {
                 aVal = parseFloat(aVal.replace(/[^0-9.-]+/g, '')) || 0;
                 bVal = parseFloat(bVal.replace(/[^0-9.-]+/g, '')) || 0;
-            } else if (column === 'low_date' || column === 'high_date') {
+            } else if (["low_date", "high_date"].includes(column)) {
                 aVal = new Date(aVal.split('-').reverse().join('-'));
                 bVal = new Date(bVal.split('-').reverse().join('-'));
             }
-
             if (direction === 'asc') {
                 return aVal > bVal ? 1 : -1;
             } else {
                 return aVal < bVal ? 1 : -1;
             }
         });
-
-        // Reorder rows
         rows.forEach(row => tbody.appendChild(row));
     }
-
     function getColumnIndex(column) {
         const columnMap = {
             'stock': 1,
@@ -282,85 +229,8 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         return columnMap[column];
     }
-});
-
-// Mobile card search functionality
-function filterMobileCards(searchTerm) {
-    const cards = document.querySelectorAll('.mobile-results-cards .result-card');
-    let visibleCount = 0;
-    cards.forEach(card => {
-        // Find the stock name span (second .font-weight-bold.text-uppercase)
-        const stockSpans = card.querySelectorAll('.font-weight-bold.text-uppercase');
-        let stockName = '';
-        if (stockSpans.length > 1) {
-            stockName = stockSpans[1].textContent.toLowerCase();
-        }
-        if (stockName.includes(searchTerm)) {
-            card.style.display = '';
-            visibleCount++;
-        } else {
-            card.style.display = 'none';
-        }
-    });
-    // Optionally, show/hide a 'no results' message for cards
-}
-
-// Attach search event for mobile cards
-const searchBox = document.getElementById('tableSearch');
-if (searchBox) {
-    searchBox.addEventListener('input', function() {
-        if (window.innerWidth <= 768) {
-            filterMobileCards(this.value.toLowerCase());
-        }
-    });
-}
-
-// Autocomplete for stock names
-function getAllStockNames() {
-    // For table: get all visible stock names
-    const tableStocks = Array.from(document.querySelectorAll('#resultsTable .stock-cell'));
-    const names = tableStocks.map(cell => cell.textContent.trim());
-    // For cards: get all visible card stock names
-    const cardStocks = Array.from(document.querySelectorAll('.mobile-results-cards .result-card'));
-    cardStocks.forEach(card => {
-        const stockSpans = card.querySelectorAll('.font-weight-bold.text-uppercase');
-        if (stockSpans.length > 1) {
-            names.push(stockSpans[1].textContent.trim());
-        }
-    });
-    // Remove duplicates
-    return Array.from(new Set(names));
-}
-
-const autocompleteList = document.getElementById('autocomplete-list');
-searchBox.addEventListener('input', function() {
-    // ... existing search code ...
-    // Autocomplete logic
-    const val = this.value.toLowerCase();
-    autocompleteList.innerHTML = '';
-    autocompleteList.classList.add('empty');
-    if (!val) return;
-    const stockNames = getAllStockNames();
-    const matches = stockNames.filter(name => name.toLowerCase().includes(val));
-    if (matches.length > 0) autocompleteList.classList.remove('empty');
-    matches.slice(0, 8).forEach(name => {
-        const item = document.createElement('div');
-        item.className = 'autocomplete-item';
-        item.innerHTML = name.replace(new RegExp(val, 'gi'), match => `<strong>${match}</strong>`);
-        item.addEventListener('mousedown', function(e) {
-            searchBox.value = name;
-            searchBox.dispatchEvent(new Event('input'));
-            autocompleteList.innerHTML = '';
-            autocompleteList.classList.add('empty');
-        });
-        autocompleteList.appendChild(item);
-    });
-});
-document.addEventListener('click', function(e) {
-    if (e.target !== searchBox) {
-        autocompleteList.innerHTML = '';
-        autocompleteList.classList.add('empty');
-    }
+    // Initial stats
+    updateStats();
 });
 </script>
 {% endblock %}

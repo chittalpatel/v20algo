@@ -6,35 +6,34 @@
     <title>{% block title %}Titanvest{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
     {% block head %}{% endblock %}
 </head>
 <body class="d-flex flex-column min-vh-100">
-<nav class="navbar navbar-expand-lg">
-    <div class="navbar-nav mx-auto">
-        <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="/">Home</a>
-        <a class="nav-link {% if request.path.startswith('/stocks') %}active{% endif %}" href="/stocks">Update Stocks</a>
-        <a class="nav-link {% if request.path.startswith('/run') %}active{% endif %}" href="/run">Run Algo</a>
-    </div>
-</nav>
-
-<main class="flex-fill">
-    {% block content %}{% endblock %}
-</main>
-
-<footer class="footer mt-auto">
-    <div class="container-fluid">
-        <div class="footer-content">
+    <!-- Main Navbar -->
+    <header class="tv-navbar">
+        <div class="tv-navbar-container">
+            <div class="tv-navbar-left">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="tv-navbar-logo tv-navbar-logo-large">
+            </div>
+            <nav class="tv-navbar-center">
+                <a href="/stocks" class="tv-navbar-link {% if request.path.startswith('/stocks') %}active{% endif %}">Stocks</a>
+                <a href="/run" class="tv-navbar-link {% if request.path.startswith('/run') %}active{% endif %}">Algorithms</a>
+            </nav>
         </div>
-    </div>
-</footer>
+    </header>
 
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-{% block scripts %}{% endblock %}
+    <main class="flex-fill main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    {% block scripts %}{% endblock %}
 </body>
 </html>

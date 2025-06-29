@@ -1,20 +1,20 @@
 {% extends "base.html" %}
 
-{% block title %}Update Stocks{% endblock %}
+{% block title %}Stocks{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
+<div class="container mt-2">
     <div class="row justify-content-center">
         <div class="col-lg-8">
             <div class="card-custom">
-                <h2>Update Stock List</h2>
+                <h2>Update Stocks</h2>
                 <p>Enter your stock symbols below, one per line.</p>
-                <form method="post" class="mt-4">
+                <form method="post">
                     <div class="form-group">
                         <label for="stocksTextArea">Stock Symbols</label>
                         <textarea class="form-control" id="stocksTextArea" name="stocks" rows="15">{{ stocks }}</textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <button type="submit" class="btn btn-primary">Update</button>
                 </form>
             </div>
         </div>
