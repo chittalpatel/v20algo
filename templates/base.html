@@ -21,8 +21,8 @@
                 <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="tv-navbar-logo tv-navbar-logo-large">
             </div>
             <nav class="tv-navbar-center">
-                <a href="/stocks" class="tv-navbar-link {% if request.path.startswith('/stocks') %}active{% endif %}">Stocks</a>
                 <a href="/run" class="tv-navbar-link {% if request.path.startswith('/run') %}active{% endif %}">Algorithms</a>
+                <a href="/stocks" class="tv-navbar-link {% if request.path.startswith('/stocks') %}active{% endif %}">Stocks</a>
             </nav>
         </div>
     </header>

@@ -3,109 +3,112 @@
 {% block title %}Algorithms{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="card-custom mt-2">
-        <h2>V20 Algorithm</h2>
-        <form method="post">
-            <div class="form-row">
-                <div class="form-group col-md-6">
+<div class="container-fluid px-0" style="width:100%;">
+    <div class="d-flex flex-row flex-wrap flex-lg-nowrap align-items-stretch w-100" style="gap: 2.5rem;">
+        <!-- V20 Algorithm Card (Left) -->
+        <div class="card-custom mb-4 h-100" style="flex: 0 0 15%; min-width: 220px; max-width: none; width: 15%;">
+            <h2>V20 Algorithm</h2>
+            <form method="post">
+                <div class="form-group">
                     <label for="history">History (days)</label>
                     <input type="text" class="form-control" id="history" name="history" placeholder="e.g. 10" value="{{ history }}">
                 </div>
-                <div class="form-group col-md-6">
+                <div class="form-group">
                     <label for="margin">Margin (%)</label>
                     <input type="text" class="form-control" id="margin" name="margin" placeholder="e.g. 20" value="{{ margin }}">
                 </div>
-            </div>
-            <div class="form-check mb-2 mt-2">
-                <input class="form-check-input" type="checkbox" name="filter-by-last-close" value="1" id="filter-by-last-close" {% if filter_by_last_close %}checked{% endif %}>
-                <label class="form-check-label" for="filter-by-last-close">
-                    Compare with latest price
-                </label>
-            </div>
-            <div class="form-group">
-                <label for="last-close-margin">Latest price margin (%)</label>
-                <input type="text" class="form-control" id="last-close-margin" name="last-close-margin" placeholder="e.g. 5" value="{{ last_close_margin }}">
-            </div>
-            <button type="submit" class="btn btn-primary btn-block">Run</button>
-        </form>
-        <hr class="my-4">
-        <h3 class="mb-3" style="font-size:1.35rem; font-weight:700; color:#222; letter-spacing:0.01em;"><span style="background:linear-gradient(90deg,#1976d2,#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Results</span></h3>
-        <div class="d-flex align-items-center mb-3" style="gap: 1rem;">
-            <div style="flex-basis:37.5%; min-width:0;">
-                <input type="text" class="form-control" id="tableSearch" placeholder="Search stock..." autocomplete="off">
-                <div id="autocomplete-list" class="autocomplete-items empty"></div>
-            </div>
-            <div style="flex-basis:50%; min-width:0; display: flex; align-items: center; justify-content: center;">
-                <label for="sortBySelect" class="mb-0 mr-2 font-weight-bold" style="font-weight:600; color:#222; min-width:60px;">Sort by</label>
-                <select id="sortBySelect" class="form-control" style="min-width: 160px; max-width: 320px;">
-                    <option value="stock-asc">Stock (A-Z)</option>
-                    <option value="stock-desc">Stock (Z-A)</option>
-                    <option value="v20margin-desc">V20 Margin % (High-Low)</option>
-                    <option value="v20margin-asc">V20 Margin % (Low-High)</option>
-                    <option value="ma-desc">200MA (₹) (High-Low)</option>
-                    <option value="ma-asc">200MA (₹) (Low-High)</option>
-                    <option value="low_date-desc">Start Date (Newest)</option>
-                    <option value="low_date-asc">Start Date (Oldest)</option>
-                    <option value="low_price-desc">Low Price (₹) (High-Low)</option>
-                    <option value="low_price-asc">Low Price (₹) (Low-High)</option>
-                    <option value="high_date-desc">High Date (Newest)</option>
-                    <option value="high_date-asc">High Date (Oldest)</option>
-                    <option value="high_price-desc">High Price (₹) (High-Low)</option>
-                    <option value="high_price-asc">High Price (₹) (Low-High)</option>
-                    <option value="buy_date-desc">Buy Date (Newest)</option>
-                    <option value="buy_date-asc">Buy Date (Oldest)</option>
-                </select>
-            </div>
-            <div style="flex-basis:12.5%; min-width:0; display: flex; justify-content: flex-end;">
-                <span class="results-badge" id="totalResultsBadge">Total: <span id="totalResults">0</span></span>
-            </div>
+                <div class="form-check mb-2 mt-2">
+                    <input class="form-check-input" type="checkbox" name="filter-by-last-close" value="1" id="filter-by-last-close" {% if filter_by_last_close %}checked{% endif %}>
+                    <label class="form-check-label" for="filter-by-last-close">
+                        Compare with latest price
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label for="last-close-margin">Latest price margin (%)</label>
+                    <input type="text" class="form-control" id="last-close-margin" name="last-close-margin" placeholder="e.g. 5" value="{{ last_close_margin }}">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Run</button>
+            </form>
         </div>
-        {% if result and result[0] != "No results!" and result|length > 0 %}
-        <div class="results-table position-relative">
-            <table class="table table-hover table-borderless mb-0" id="resultsTable">
-                <thead class="thead-light">
-                    <tr>
-                        <th style="text-align:center; white-space:nowrap;">Stock</th>
-                        <th style="text-align:center; white-space:nowrap;">V20 Margin&nbsp;%</th>
-                        <th style="text-align:center; white-space:nowrap;">200MA <span style="color:#888;">(₹)</span></th>
-                        <th style="text-align:center; white-space:nowrap;">Start Date</th>
-                        <th style="text-align:center; white-space:nowrap;">Low Price <span style="color:#888;">(₹)</span></th>
-                        <th style="text-align:center; white-space:nowrap;">High Date</th>
-                        <th style="text-align:center; white-space:nowrap;">High Price <span style="color:#888;">(₹)</span></th>
-                        <th style="text-align:center; white-space:nowrap;">Buy Date</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for r in result %}
-                    <tr>
-                        <td>
-                            <a href="https://www.tradingview.com/symbols/{{ r.stock }}/" target="_blank" rel="noopener noreferrer" style="color:#1976d2; text-decoration:underline; font-weight:600;">
-                                {{ r.stock }}
-                            </a>
-                        </td>
-                        <td>{{ r.v20margin }}%</td>
-                        <td>{{ r.ma }}</td>
-                        <td>{{ r.low_date }}</td>
-                        <td>{{ r.low_price }}</td>
-                        <td>{{ r.high_date }}</td>
-                        <td>{{ r.high_price }}</td>
-                        <td>{{ r.buy_date }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            <div class="no-results-message" id="noResultsMessage" style="display:none;">
+        <!-- Results Card (Right) -->
+        <div class="card-custom flex-grow-1 mb-4 h-100" style="flex: 1 1 0; min-width: 340px; max-width: none; width: 85%;">
+            <h3 class="mb-3" style="font-size:1.35rem; font-weight:700; color:#222; letter-spacing:0.01em;"><span style="background:linear-gradient(90deg,#1976d2,#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Results</span></h3>
+            <div class="d-flex align-items-center mb-3" style="gap: 1rem;">
+                <div style="flex-basis:37.5%; min-width:0;">
+                    <input type="text" class="form-control" id="tableSearch" placeholder="Search stock..." autocomplete="off">
+                    <div id="autocomplete-list" class="autocomplete-items empty"></div>
+                </div>
+                <div style="flex-basis:50%; min-width:0; display: flex; align-items: center; justify-content: center;">
+                    <label for="sortBySelect" class="mb-0 mr-2 font-weight-bold" style="font-weight:600; color:#222; min-width:60px;">Sort by</label>
+                    <select id="sortBySelect" class="form-control" style="min-width: 160px; max-width: 320px;">
+                        <option value="stock-asc">Stock (A-Z)</option>
+                        <option value="stock-desc">Stock (Z-A)</option>
+                        <option value="v20margin-desc">V20 Margin % (High-Low)</option>
+                        <option value="v20margin-asc">V20 Margin % (Low-High)</option>
+                        <option value="ma-desc">200MA (₹) (High-Low)</option>
+                        <option value="ma-asc">200MA (₹) (Low-High)</option>
+                        <option value="low_date-desc">Start Date (Newest)</option>
+                        <option value="low_date-asc">Start Date (Oldest)</option>
+                        <option value="low_price-desc">Low Price (₹) (High-Low)</option>
+                        <option value="low_price-asc">Low Price (₹) (Low-High)</option>
+                        <option value="high_date-desc">High Date (Newest)</option>
+                        <option value="high_date-asc">High Date (Oldest)</option>
+                        <option value="high_price-desc">High Price (₹) (High-Low)</option>
+                        <option value="high_price-asc">High Price (₹) (Low-High)</option>
+                        <option value="buy_date-desc">Buy Date (Newest)</option>
+                        <option value="buy_date-asc">Buy Date (Oldest)</option>
+                    </select>
+                </div>
+                <div style="flex-basis:12.5%; min-width:0; display: flex; justify-content: flex-end;">
+                    <span class="results-badge" id="totalResultsBadge">Total: <span id="totalResults">0</span></span>
+                </div>
+            </div>
+            {% if result and result[0] != "No results!" and result|length > 0 %}
+            <div class="results-table position-relative">
+                <table class="table table-hover table-borderless mb-0" id="resultsTable">
+                    <thead class="thead-light">
+                        <tr>
+                            <th style="text-align:center; white-space:nowrap;">Stock</th>
+                            <th style="text-align:center; white-space:nowrap;">V20 Margin&nbsp;%</th>
+                            <th style="text-align:center; white-space:nowrap;">200MA <span style="color:#888;">(₹)</span></th>
+                            <th style="text-align:center; white-space:nowrap;">Start Date</th>
+                            <th style="text-align:center; white-space:nowrap;">Low Price <span style="color:#888;">(₹)</span></th>
+                            <th style="text-align:center; white-space:nowrap;">High Date</th>
+                            <th style="text-align:center; white-space:nowrap;">High Price <span style="color:#888;">(₹)</span></th>
+                            <th style="text-align:center; white-space:nowrap;">Buy Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in result %}
+                        <tr>
+                            <td>
+                                <a href="https://www.tradingview.com/symbols/{{ r.stock }}/" target="_blank" rel="noopener noreferrer" style="color:#1976d2; text-decoration:underline; font-weight:600;">
+                                    {{ r.stock }}
+                                </a>
+                            </td>
+                            <td>{{ r.v20margin }}%</td>
+                            <td>{{ r.ma }}</td>
+                            <td>{{ r.low_date }}</td>
+                            <td>{{ r.low_price }}</td>
+                            <td>{{ r.high_date }}</td>
+                            <td>{{ r.high_price }}</td>
+                            <td>{{ r.buy_date }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div class="no-results-message" id="noResultsMessage" style="display:none;">
+                    <p>No results match your search criteria</p>
+                    <small>Try adjusting your search terms</small>
+                </div>
+            </div>
+            {% else %}
+            <div class="no-results-message show" style="display:block;">
                 <p>No results match your search criteria</p>
                 <small>Try adjusting your search terms</small>
             </div>
+            {% endif %}
         </div>
-        {% else %}
-        <div class="no-results-message show" style="display:block;">
-            <p>No results match your search criteria</p>
-            <small>Try adjusting your search terms</small>
-        </div>
-        {% endif %}
     </div>
 </div>
 {% endblock %}
