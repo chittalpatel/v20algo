@@ -103,7 +103,7 @@ class Algo:
             else:
                 valid = True
             # for catching weird scenarios that will rise with bad data
-            if high_date.date < low_date.date:
+            if high.date < low.date:
                 valid = False
         if valid:
             # Find the buy date: first day after 'end' where price's low <= low.low
