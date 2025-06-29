@@ -49,7 +49,17 @@ class StockData:
         # Collect all actions
         actions = []
         for idx, ca_cell in df['CA'].items():
-            if pd.isna(ca_cell):
+            # Robustly skip empty/invalid ca_cell
+            skip = False
+            if ca_cell is None:
+                skip = True
+            elif isinstance(ca_cell, float) and np.isnan(ca_cell):
+                skip = True
+            elif isinstance(ca_cell, (list, dict)) and not ca_cell:
+                skip = True
+            elif isinstance(ca_cell, str) and ca_cell.strip() == '':
+                skip = True
+            if skip:
                 continue
             # If already a list/dict, use as is, else try to eval
             ca_list = ca_cell
@@ -146,6 +156,8 @@ class StockData:
             return df, errors
         except Exception as e:
             errors.append(f"Error downloading data for {self.stock}: {e}")
+            import traceback
+            print(traceback.format_exc())
             return None, errors
 
     def update_to_date(self, target_date: datetime, initial_years=DEFAULT_INITIAL_YEARS):
