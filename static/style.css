@@ -261,3 +261,10 @@ label {
 .autocomplete-items.empty {
     display: none;
 }
+
+.toast-container.position-fixed.top-0.end-0 {
+    top: 2rem !important;
+    right: 2.5rem !important;
+    left: auto !important;
+    margin: 0 !important;
+}
