@@ -83,7 +83,11 @@
                 <tbody>
                     {% for r in result %}
                     <tr>
-                        <td>{{ r.stock }}</td>
+                        <td>
+                            <a href="https://www.tradingview.com/symbols/{{ r.stock }}/" target="_blank" rel="noopener noreferrer" style="color:#1976d2; text-decoration:underline; font-weight:600;">
+                                {{ r.stock }}
+                            </a>
+                        </td>
                         <td>{{ r.v20margin }}%</td>
                         <td>{{ r.ma }}</td>
                         <td>{{ r.low_date }}</td>
