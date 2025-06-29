@@ -2,7 +2,7 @@ from datetime import date
 from typing import Union, List
 import pandas as pd
 from config import DATA_DIR
-from sync_data import get_stock_file_path
+from data import StockData
 import os
 
 class Price:
@@ -28,10 +28,9 @@ class Price:
 
 
 def get_daily_price(stock: str, days: int) -> List[Price]:
-    file_path = get_stock_file_path(stock)
-    if not os.path.exists(file_path):
+    data = StockData(stock).load()
+    if data is None:
         return []
-    data = pd.read_csv(file_path, index_col='Date', parse_dates=True)
 
     # Read extra data to ensure we have enough for MA calculation
     # We need at least 200 days + the requested days
