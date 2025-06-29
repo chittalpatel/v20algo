@@ -104,6 +104,12 @@ class Algo:
             else:
                 valid = True
         if valid:
+            # Find the buy date: first day after 'end' where price's low <= low.low
+            buy_date = None
+            for i in range(end, self.n):
+                if self.prices[i].low <= low.low:
+                    buy_date = self.prices[i].fdate
+                    break
             self.ans.append({
                 'stock': self.stock,
                 'profit_margin': round(profit_potential, 2) if profit_potential is not None else None,
@@ -112,7 +118,8 @@ class Algo:
                 'low_date': low.fdate,
                 'low_price': round(low.low, 2),
                 'high_date': high.fdate,
-                'high_price': round(high.high, 2)
+                'high_price': round(high.high, 2),
+                'buy_date': buy_date
             })
         return end + 1
 
